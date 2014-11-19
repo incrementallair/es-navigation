@@ -1,0 +1,3 @@
+'.editor':
+  'ctrl-alt-n': 'atom-symbol-navigation:jump-to-next-id'
+  'ctrl-alt-p': 'atom-symbol-navigation:jump-to-prev-id'
