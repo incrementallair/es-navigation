@@ -10,6 +10,9 @@ module.exports =
     #attach statusbar view
     atom.packages.once 'activated', @createStatusBarView
 
+    #set default config options
+    atom.config.set "atom-symbol-navigation", showScopeHighlights: true
+
     #attach commands
     atom.workspaceView.command "atom-symbol-navigation:jump-to-next-id", =>
       @jumpToUsageOfIdentifier skip: 1
@@ -79,6 +82,10 @@ module.exports =
   #highlight a scope in a given editor
   highlightScope: (scope, editor) ->
     @clearHighlight()
+
+    #check if scope highlighting is activated
+    if !(atom.config.get "atom-symbol-navigation.showScopeHighlights")
+      return
 
     location = scope.block.loc
     range = @util.createRangeFromLocation location
