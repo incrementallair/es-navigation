@@ -18,7 +18,13 @@ parseScopesFromBuffer: (buffer, path=null) ->
     esprima = require('esprima-fb')
     escope = require('escope')
     syntaxTree = esprima.parse(buffer, loc: true)
-    scopes = escope.analyze(syntaxTree, ecmaVersion: 6).scopes
+
+    #check whether es6 is supported
+    es6Support = atom.config.get "atom-symbol-navigation.es6Support"
+    if es6Support
+      scopes = escope.analyze(syntaxTree, ecmaVersion: 6).scopes
+    else
+      scopes = escope.analyze(syntaxTree, ecmaVersion: 5).scopes
   catch
     console.error "atom-symbol-navigation: problem parsing  #{path}"
     return null
@@ -61,8 +67,12 @@ parseIdentifiersFromScope: (scope) ->
   return identifiers
 
 #invalidate scopes cache for a given path
-invalidateScopesCache: (path) ->
-  parseScopesCache.delete path
+#if path is not given, invalidate entire cache
+invalidateScopesCache: (path=null) ->
+  if path
+    parseScopesCache.delete path
+  else
+    parseScopesCache = new Map()
 
 #get scopes cache size
 getScopesCacheSize: ->

@@ -11,7 +11,10 @@ module.exports =
     atom.packages.once 'activated', @createStatusBarView
 
     #set default config options
-    atom.config.set "atom-symbol-navigation", showScopeHighlights: true
+    atom.config.set "atom-symbol-navigation", {
+      showScopeHighlights: true,
+      es6Support: true
+    }
 
     #attach commands
     atom.workspaceView.command "atom-symbol-navigation:jump-to-next-id", =>
@@ -22,6 +25,10 @@ module.exports =
 
     atom.workspaceView.command "atom-symbol-navigation:select-all-id", =>
       @selectAllIdentifiers()
+
+    #when es6 config option changes, invalidate cache
+    @subscribe atom.config.observe 'atom-symbol-navigation.es6Support', =>
+      @parser.invalidateScopesCache()
 
     #when active panel changes, erase status text
     atom.workspace.onDidChangeActivePaneItem =>

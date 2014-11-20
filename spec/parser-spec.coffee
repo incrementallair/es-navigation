@@ -7,8 +7,11 @@ describe "parser :: parseIdentifiersFromScope", ->
   parsedScopes = parser.parseScopesFromBuffer buffer
 
   it "correctly parses identifiers from scope", ->
-    lengths = [5, 2, 4, 2]
-    for index in [0 ... 4]
+    #result depends on es6 support
+    es6Support = atom.config.get "atom-symbol-navigation.es6Support"
+
+    lengths = if es6Support then [5, 2, 4, 2] else [6, 4, 2]
+    for index in [0 ... lengths.length]
       parsedIds = parser.parseIdentifiersFromScope parsedScopes[index].scope
       expect(parsedIds.length).toEqual lengths[index]
 
@@ -17,9 +20,10 @@ describe "parser :: parseScopesFromBuffer", ->
   parsedScopes = parser.parseScopesFromBuffer buffer
 
   it "correctly parses number of scopes", ->
-    #we expect 4 scopes as the ES6 parser will treat for loop
-    # as a block scope
-    expect(parsedScopes.length).toEqual 4
+    #result depends on es6 support:
+    #number of scopes depends on whether block scopes are counted
+    es6Support = atom.config.get "atom-symbol-navigation.es6Support"
+    expect(parsedScopes.length).toEqual(if es6Support then 4 else 3)
 
   it "correctly parses scope identifiers", ->
     for index in [0 ... 3]
