@@ -8,18 +8,34 @@ module.exports =
     atom.workspaceView.command "atom-symbol-navigation:jump-to-prev-id", =>
       @jumpToUsageOfIdentifier skip: -1
 
+    atom.workspaceView.command "atom-symbol-navigation:select-all-id", =>
+      @selectAllIdentifier()
+
+  #Multiselects all identifiers in scope matching cursor
+  selectAllIdentifier: ->
+    editor = @util.getActiveEditor()
+    cursorId = @getIdentifierAtCursor()
+
+    if cursorId && editor
+      for id in cursorId.usages
+        range = @util.createRangeFromLocation id.loc
+        editor.addSelectionForBufferRange range
+
   #jumps to the position of the next identifier matching the one
   #at the current cursor. What next means depends on parameters:
   # skip: skip this many identifiers after the current
   #TODO: cache the results of scope lookups until buffer is changed.
   jumpToUsageOfIdentifier: (params) ->
-    loc = @getNextUsageOfIdentifier params
-    if loc
-      nextUsage = [loc.start.line - 1, loc.start.column]
+    next = @getNextUsageOfIdentifier params
+    if next
+      loc = next.id.loc
+      nextUsage = [loc.start.line - 1, loc.start.column + next.pos]
       @util.getActiveEditor().setCursorBufferPosition nextUsage
 
-  #returns the actual position of the next parameter as defined above
-  getNextUsageOfIdentifier: (params) ->
+  #returns all identifiers in scope that match the one at cursor,
+  #  the identifier at cursor, and relative position of cursor to id
+  #works top down from global scope
+  getIdentifierAtCursor: ->
     esprima = require('esprima-fb')
     escope = require('escope')
 
@@ -40,14 +56,31 @@ module.exports =
         #found an identifier at the cursor
         if cursorIds.length != 0
           usages = identifiers.filter (node) ->
-            #should possibly assert length is 1 here
-            #if we find multiple ids at cursor this is an issue
             node.name == cursorIds[0].name
 
-          #get next node from current
-          index = usages.indexOf cursorIds[0]
-          return usages[(usages.length + index + params.skip) %
-                                        usages.length].loc
+          return {
+            id: cursorIds[0],
+            pos: cursorPos.column - cursorIds[0].loc.start.column,
+            usages: usages
+          }
+    return null
+
+  #returns the actual position of the next parameter as defined above,
+  #along with relative position of cursor
+  getNextUsageOfIdentifier: (params) ->
+    cursorId = @getIdentifierAtCursor()
+
+    #if there are identifiers that match one at cursor, get next
+    if cursorId
+      index = cursorId.usages.indexOf cursorId.id
+      index = (cursorId.usages.length + index + params.skip) %
+                    cursorId.usages.length
+
+      return {
+        id: cursorId.usages[index],
+        pos: cursorId.pos
+      }
+
     #no identifier found at cursor
     return null
 

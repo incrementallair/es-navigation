@@ -18,6 +18,14 @@ module.exports =
     if a.loc.start.column > b.loc.start.column then return 1
     return 0
 
+  #util for working with esprima locs
+  #create atom range from location
+  createRangeFromLocation: (loc) ->
+    [
+      [loc.start.line - 1, loc.start.column],
+      [loc.end.line - 1, loc.end.column]
+    ]
+
   #get active text editor, or return null
   getActiveEditor: ->
     atom.workspace.getActiveTextEditor()
