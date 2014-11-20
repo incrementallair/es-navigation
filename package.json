@@ -1,6 +1,6 @@
 {
   "name": "atom-symbol-navigation",
-  "main": "./lib/atom-symbol-navigation",
+  "main": "./lib/main",
   "version": "0.0.0",
   "description": "Scope-sensitive navigation between javascript symbols.",
   "repository": "https://github.com/incrementallair/atom-symbol-navigation",
@@ -10,6 +10,6 @@
   },
   "dependencies": {
     "esprima-fb": "*",
-    "escope": "1.0.1"
+    "escope": "git://github.com/Constellation/escope.git#master"
   }
 }

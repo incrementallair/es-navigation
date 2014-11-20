@@ -2,12 +2,9 @@
 symNavStatusBarView = null
 symNavScopeHighlight = null
 
-#cache for editor parsing
-#file path of editor is mapped to parsed buffer
-symNavParserCache = new Map()
-
 module.exports =
   util: require('./util')
+  parser: require('./parser')
 
   activate: (state) ->
     #attach statusbar view
@@ -35,41 +32,7 @@ module.exports =
         @clearStatusBar()
         @clearHighlight()
       editor.onDidChange =>
-        @invalidateEditorCache editor
-
-  #invalidate cache for given editor
-  invalidateEditorCache: (editor) ->
-    symNavParserCache[editor.getPath()] = null
-
-  #parse identifiers out of scopes - from cache, if possible, else
-  #we calculate it and cache it.
-  parseEditor: (editor) ->
-    if symNavParserCache[editor.getPath()]
-      return symNavParserCache[editor.getPath()]
-
-    esprima = require('esprima-fb')
-    escope = require('escope')
-
-    try
-      syntaxTree = esprima.parse(editor.getText(), loc: true)
-      parsedBuffer = {
-        syntaxTree: syntaxTree,
-        scopes: escope.analyze(syntaxTree).scopes
-      }
-    catch
-      console.error "atom-symbol-navigation: problem parsing  #{editor.getTitle()}"
-      return null
-
-    syntaxTree = parsedBuffer.syntaxTree
-    scopes = parsedBuffer.scopes
-
-    parsedScopes = scopes.map (scope) =>
-      {
-        scope: scope,
-        identifiers: @getIdentifiersInScope scope
-      }
-    symNavParserCache[editor.getPath()] = parsedScopes
-    return parsedScopes
+        @parser.invalidateScopesCache editor.getPath()
 
   #Create status bar view element. Have to wait for packages to load first
   createStatusBarView: ->
@@ -99,7 +62,6 @@ module.exports =
   #jumps to the position of the next identifier matching the one
   #at the current cursor. What next means depends on parameters:
   # skip: skip this many identifiers after the current
-  #TODO: cache the results of scope lookups until buffer is changed.
   jumpToUsageOfIdentifier: (params) ->
     next = @getNextUsageOfIdentifier params
     editor = @util.getActiveEditor()
@@ -147,7 +109,7 @@ module.exports =
 
     if editor
       cursorPos = editor.getCursorBufferPosition()
-      parsedScopes = @parseEditor editor
+      parsedScopes = @parser.parseScopesFromBuffer editor.getText(), editor.getPath()
       if !parsedScopes then return null
 
       #run through scopes, get identifiers in each
@@ -192,29 +154,3 @@ module.exports =
 
     #no identifier found at cursor
     return null
-
-  #get list of identifiers in the given scope
-  #returns the list sorted by position in buffer
-  getIdentifiersInScope: (scope) ->
-    identifiers = []
-
-    #we want to include refs to variables that aren't resolved in this scope
-    #this would be the case, for instance, if we are referencing a global
-    #from within a function.
-    for ref in scope.through
-      identifiers.push ref.identifier
-
-    #we also want to include resolved variables along with their
-    #references. This include function parameters etc.
-    for variable in scope.variables
-      for reference in variable.references
-        identifiers.push reference.identifier
-      for identifier in variable.identifiers
-        identifiers.push identifier
-
-    #get rid of duplicates, and sort by position
-    identifiers = identifiers.filter (item, index) ->
-      identifiers.indexOf(item) == index
-    identifiers = identifiers.sort @util.compareIdentifierLocations
-
-    return identifiers
