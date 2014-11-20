@@ -41,10 +41,10 @@ module.exports =
   invalidateEditorCache: (editor) ->
     symNavParserCache[editor.getPath()] = null
 
-  #get parsed buffer data - from cache, if possible, else
+  #parse identifiers out of scopes - from cache, if possible, else
   #we calculate it and cache it.
   parseEditor: (editor) ->
-    if symNavParserCache[editor.getPath()]?
+    if symNavParserCache[editor.getPath()]
       return symNavParserCache[editor.getPath()]
 
     esprima = require('esprima-fb')
@@ -60,8 +60,16 @@ module.exports =
       console.error "atom-symbol-navigation: problem parsing  #{editor.getTitle()}"
       return null
 
-    symNavParserCache[editor.getPath()] = parsedBuffer
-    return parsedBuffer
+    syntaxTree = parsedBuffer.syntaxTree
+    scopes = parsedBuffer.scopes
+
+    parsedScopes = scopes.map (scope) =>
+      {
+        scope: scope,
+        identifiers: @getIdentifiersInScope scope
+      }
+    symNavParserCache[editor.getPath()] = parsedScopes
+    return parsedScopes
 
   #Create status bar view element. Have to wait for packages to load first
   createStatusBarView: ->
@@ -136,19 +144,17 @@ module.exports =
   #works top down from global scope
   getIdentifierAtCursor: ->
     editor = @util.getActiveEditor()
+
     if editor
       cursorPos = editor.getCursorBufferPosition()
-      parsedBuffer = @parseEditor editor
-      if !parsedBuffer?  then return null
-
-      syntaxTree = parsedBuffer.syntaxTree
-      scopes = parsedBuffer.scopes
+      parsedScopes = @parseEditor editor
+      if !parsedScopes then return null
 
       #run through scopes, get identifiers in each
       #if we find one at the cursor position, look
       #for the next identifier
-      for scope in scopes
-        identifiers = @getIdentifiersInScope scope
+      for parsedScope in parsedScopes
+        identifiers = parsedScope.identifiers
         cursorIds = identifiers.filter (node) =>
           @util.positionIsInsideLocation(cursorPos, node.loc)
 
@@ -161,7 +167,7 @@ module.exports =
             id: cursorIds[0],
             pos: cursorPos.column - cursorIds[0].loc.start.column,
             usages: usages,
-            scope: scope
+            scope: parsedScope.scope
           }
     return null
 
