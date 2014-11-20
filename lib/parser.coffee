@@ -18,7 +18,7 @@ parseScopesFromBuffer: (buffer, path=null) ->
     esprima = require('esprima-fb')
     escope = require('escope')
     syntaxTree = esprima.parse(buffer, loc: true)
-    scopes = escope.analyze(syntaxTree).scopes
+    scopes = escope.analyze(syntaxTree, ecmaVersion: 6).scopes
   catch
     console.error "atom-symbol-navigation: problem parsing  #{path}"
     return null
