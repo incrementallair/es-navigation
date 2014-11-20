@@ -33,30 +33,33 @@ module.exports =
 
         #found an identifier at the cursor, so return pos of next
         if cursorIds.length != 0
-          references = identifiers.filter (node) ->
+          usages = identifiers.filter (node) ->
             node.name == cursorIds[0].name
 
-          index = references.indexOf cursorIds[0]
-          return references[(references.length + index + params.skip) %
-                                        references.length].loc
+          index = usages.indexOf cursorIds[0]
+          return usages[(usages.length + index + params.skip) %
+                                        usages.length].loc
     return null
 
   #get list of identifiers in the given scope
   getIdentifiersInScope: (scope) ->
     estraverse = require('estraverse')
+    identifiers = []
+
+    #we want to include variables that aren't resolved in this scope
+    #this would be the case, for instance, if we are referencing a
+    #global from within a function.
+    for ref in scope.through
+      identifiers.push ref.identifier
 
     #we include both references and definitions of the identifiers
-    identifiers = []
+    #TODO: really need to cache this call, pretty inefficient.
     for ref in scope.references
       identifiers.push ref.identifier
+
       if ref.resolved
-        for def in ref.resolved.defs
-          switch(def.type)
-            when 'Variable' then identifiers.push def.node.id
-            when 'FunctionName' then identifiers.push def.node.id
-            when 'CatchClause' then identifiers.push def.node.param
-            when 'Parameter' then identifiers.concat def.node.params
-            else console.error("unknown type: #{def.node.type}")
+        for varRef in ref.resolved.references
+          identifiers.push varRef.identifier
 
     #get rid of duplicates, and sort by position
     identifiers = identifiers.filter (item, index) ->
