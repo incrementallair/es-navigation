@@ -1,15 +1,23 @@
 # Atom Symbol Navigation
 
-Scope-sensitive javascript symbol navigation at the press of a button.
+Provides keybindings for scope-sensitive symbol navigation in javascript files.
 
-# Some Issues
+# Usage
 
-Currently only jumps between variables being defined or used explicitly, ignoring things like:
-> var i; <br>
-> i = 5;
+By default the following keybindings are provided:
+* <kbd>Ctrl-Alt-N</kbd> : Jump to next symbol at cursor in scope.
+* <kbd>Ctrl-Alt-P</kbd> : Jump to previous symbol at cursor in scope.
+* <kbd>Ctrl-Alt-D</kbd> : Select all matches of symbol at cursor in scope.
 
-Also, escope does not have full support for ES6 block scopes yet,
-meaning things like this break:
->for (let i = 0; i < 3; i++) <br>
->for (let i = 0; i < 3; i++) <br>
->   ...
+# Issues
+
+This package makes use of [Escope](https://github.com/Constellation/escope) for scope analysis, which currently has only partial support for ES6 features. As a result, the scope analysis is occasionally wrong, for instance in something like:
+
+```javascript
+var tmp = 0;
+for (let i = 0; i < 10; i++)
+  for (let i = 0; i < 10; i++)
+    tmp += i;
+```
+
+According to the ES6 specs, the different `i`'s are in different scopes, in contrast to ES5 variable declarations.
