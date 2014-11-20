@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "esprima-fb": "*",
-    "escope": "1.0.1",
-    "estraverse": "1.7.1"
+    "escope": "1.0.1"
   }
 }

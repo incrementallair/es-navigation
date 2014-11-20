@@ -110,7 +110,7 @@ module.exports =
     location = scope.block.loc
     range = @util.createRangeFromLocation location
     marker = editor.markBufferRange range
-    decor = editor.decorateMarker marker, type: 'highlight', class: 'soft-highlight'
+    decor = editor.decorateMarker marker, type: 'highlight', class: 'soft-red-highlight'
     symNavScopeHighlight = decor
 
   #Update out status bar reference
@@ -187,12 +187,11 @@ module.exports =
   #get list of identifiers in the given scope
   #returns the list sorted by position in buffer
   getIdentifiersInScope: (scope) ->
-    estraverse = require('estraverse')
     identifiers = []
 
-    #we want to include variables that aren't resolved in this scope
-    #this would be the case, for instance, if we are referencing a
-    #global from within a function.
+    #we want to include refs to variables that aren't resolved in this scope
+    #this would be the case, for instance, if we are referencing a global
+    #from within a function.
     for ref in scope.through
       identifiers.push ref.identifier
 
@@ -202,6 +201,11 @@ module.exports =
       if ref.resolved
         for varRef in ref.resolved.references
           identifiers.push varRef.identifier
+
+    #include non-expression declarations
+    for variable in scope.variables
+      for identifier in variable.identifiers
+        identifiers.push identifier
 
     #get rid of duplicates, and sort by position
     identifiers = identifiers.filter (item, index) ->
