@@ -10,3 +10,5 @@ By default the following keybindings are provided:
 * <kbd>Ctrl-Alt-D</kbd> : Select all matches of symbol at cursor.
 
 Matching is scope-sensitive - two variables defined in different scopes but sharing a name are recognized as being different and not matched.
+
+Scope highlighting on usage of any of these keybindings can be turned on or off in the atom configuration screen.
