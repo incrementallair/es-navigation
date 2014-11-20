@@ -1,9 +1,10 @@
-#status bar view reference
+#notification references - scope highlighting and status bar
 symNavStatusBarView = null
+symNavScopeHighlight = null
 
 #cache for editor parsing
 #file path of editor is mapped to parsed buffer
-symNavEditorCache = new Map()
+symNavParserCache = new Map()
 
 module.exports =
   util: require('./util')
@@ -32,18 +33,19 @@ module.exports =
     atom.workspace.observeTextEditors (editor) =>
       editor.onDidChangeCursorPosition =>
         @clearStatusBar()
+        @clearHighlight()
       editor.onDidChange =>
         @invalidateEditorCache editor
 
   #invalidate cache for given editor
   invalidateEditorCache: (editor) ->
-    symNavEditorCache[editor.getPath()] = null
+    symNavParserCache[editor.getPath()] = null
 
   #get parsed buffer data - from cache, if possible, else
   #we calculate it and cache it.
   parseEditor: (editor) ->
-    if symNavEditorCache[editor.getPath()]?
-      return symNavEditorCache[editor.getPath()]
+    if symNavParserCache[editor.getPath()]?
+      return symNavParserCache[editor.getPath()]
 
     esprima = require('esprima-fb')
     escope = require('escope')
@@ -58,7 +60,7 @@ module.exports =
       console.error "atom-symbol-navigation: problem parsing  #{editor.getTitle()}"
       return null
 
-    symNavEditorCache[editor.getPath()] = parsedBuffer
+    symNavParserCache[editor.getPath()] = parsedBuffer
     return parsedBuffer
 
   #Create status bar view element. Have to wait for packages to load first
@@ -82,8 +84,9 @@ module.exports =
         range = @util.createRangeFromLocation id.loc
         editor.addSelectionForBufferRange range
 
-      #update status bar
+      #update status bar and highlight scope
       @updateStatusBar "#{cursorId.usages.length} matches"
+      @highlightScope cursorId.scope, editor
 
   #jumps to the position of the next identifier matching the one
   #at the current cursor. What next means depends on parameters:
@@ -98,14 +101,30 @@ module.exports =
       @util.getActiveEditor().setCursorBufferPosition nextUsage
 
       #update status bar details
-      @updateStatusBar "#{next.index+1}/#{next.matches}"
+      @updateStatusBar "#{next.index+1}/#{next.matches} matches"
+
+  #highlight a scope in a given editor
+  highlightScope: (scope, editor) ->
+    @clearHighlight()
+
+    location = scope.block.loc
+    range = @util.createRangeFromLocation location
+    marker = editor.markBufferRange range
+    decor = editor.decorateMarker marker, type: 'highlight', class: 'soft-highlight'
+    symNavScopeHighlight = decor
 
   #Update out status bar reference
   updateStatusBar: (text) ->
     if symNavStatusBarView?
       symNavStatusBarView.updateText text
 
-  #clear status bar text
+  #clears current (if any) highlights
+  clearHighlight: ->
+    if symNavScopeHighlight
+      symNavScopeHighlight.getMarker().destroy()
+      symNavScopeHighlight = null
+
+  #clear status bar
   clearStatusBar: ->
     @updateStatusBar ''
 
@@ -138,7 +157,8 @@ module.exports =
           return {
             id: cursorIds[0],
             pos: cursorPos.column - cursorIds[0].loc.start.column,
-            usages: usages
+            usages: usages,
+            scope: scope
           }
     return null
 
@@ -157,7 +177,8 @@ module.exports =
         id: cursorId.usages[index],
         index: index,
         matches:  cursorId.usages.length,
-        pos: cursorId.pos
+        pos: cursorId.pos,
+        scope: cursorId.scope
       }
 
     #no identifier found at cursor
