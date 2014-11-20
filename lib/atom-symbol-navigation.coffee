@@ -1,7 +1,18 @@
+#status bar view reference
+symNavStatusBarView = null
+
+#cache for editor parsing
+#file path of editor is mapped to parsed buffer
+symNavEditorCache = new Map()
+
 module.exports =
   util: require('./util')
 
   activate: (state) ->
+    #attach statusbar view
+    atom.packages.once 'activated', @createStatusBarView
+
+    #attach commands
     atom.workspaceView.command "atom-symbol-navigation:jump-to-next-id", =>
       @jumpToUsageOfIdentifier skip: 1
 
@@ -9,17 +20,70 @@ module.exports =
       @jumpToUsageOfIdentifier skip: -1
 
     atom.workspaceView.command "atom-symbol-navigation:select-all-id", =>
-      @selectAllIdentifier()
+      @selectAllIdentifiers()
+
+    #when active panel changes, erase status text
+    atom.workspace.onDidChangeActivePaneItem =>
+      @clearStatusBar()
+
+    #when text editors are edited, add
+    #  status bar erasing when cursor moves
+    #  cache invalidation when content changes
+    atom.workspace.observeTextEditors (editor) =>
+      editor.onDidChangeCursorPosition =>
+        @clearStatusBar()
+      editor.onDidChange =>
+        @invalidateEditorCache editor
+
+  #invalidate cache for given editor
+  invalidateEditorCache: (editor) ->
+    symNavEditorCache[editor.getPath()] = null
+
+  #get parsed buffer data - from cache, if possible, else
+  #we calculate it and cache it.
+  parseEditor: (editor) ->
+    if symNavEditorCache[editor.getPath()]?
+      return symNavEditorCache[editor.getPath()]
+
+    esprima = require('esprima-fb')
+    escope = require('escope')
+
+    try
+      syntaxTree = esprima.parse(editor.getText(), loc: true)
+      parsedBuffer = {
+        syntaxTree: syntaxTree,
+        scopes: escope.analyze(syntaxTree).scopes
+      }
+    catch
+      console.error "atom-symbol-navigation: problem parsing  #{editor.getTitle()}"
+      return null
+
+    symNavEditorCache[editor.getPath()] = parsedBuffer
+    return parsedBuffer
+
+  #Create status bar view element. Have to wait for packages to load first
+  createStatusBarView: ->
+    statusBar = atom.workspaceView.statusBar
+    if statusBar && !symNavStatusBarView
+      StatusBarView = require './status-bar-view'
+
+      symNavStatusBarView = new StatusBarView()
+      symNavStatusBarView.initialize statusBar
+      symNavStatusBarView.attach()
 
   #Multiselects all identifiers in scope matching cursor
-  selectAllIdentifier: ->
+  selectAllIdentifiers: ->
     editor = @util.getActiveEditor()
     cursorId = @getIdentifierAtCursor()
 
     if cursorId && editor
+      #match exists, select all
       for id in cursorId.usages
         range = @util.createRangeFromLocation id.loc
         editor.addSelectionForBufferRange range
+
+      #update status bar
+      @updateStatusBar "#{cursorId.usages.length} matches"
 
   #jumps to the position of the next identifier matching the one
   #at the current cursor. What next means depends on parameters:
@@ -28,22 +92,35 @@ module.exports =
   jumpToUsageOfIdentifier: (params) ->
     next = @getNextUsageOfIdentifier params
     if next
+      #move cursor to next identifier
       loc = next.id.loc
       nextUsage = [loc.start.line - 1, loc.start.column + next.pos]
       @util.getActiveEditor().setCursorBufferPosition nextUsage
+
+      #update status bar details
+      @updateStatusBar "#{next.index+1}/#{next.matches}"
+
+  #Update out status bar reference
+  updateStatusBar: (text) ->
+    if symNavStatusBarView?
+      symNavStatusBarView.updateText text
+
+  #clear status bar text
+  clearStatusBar: ->
+    @updateStatusBar ''
 
   #returns all identifiers in scope that match the one at cursor,
   #  the identifier at cursor, and relative position of cursor to id
   #works top down from global scope
   getIdentifierAtCursor: ->
-    esprima = require('esprima-fb')
-    escope = require('escope')
-
     editor = @util.getActiveEditor()
     if editor
-      syntaxTree = esprima.parse(editor.getText(), loc: true)
-      scopes = escope.analyze(syntaxTree).scopes
       cursorPos = editor.getCursorBufferPosition()
+      parsedBuffer = @parseEditor editor
+      if !parsedBuffer?  then return null
+
+      syntaxTree = parsedBuffer.syntaxTree
+      scopes = parsedBuffer.scopes
 
       #run through scopes, get identifiers in each
       #if we find one at the cursor position, look
@@ -66,7 +143,7 @@ module.exports =
     return null
 
   #returns the actual position of the next parameter as defined above,
-  #along with relative position of cursor
+  #along with relative position of cursor, and index/totalMatches
   getNextUsageOfIdentifier: (params) ->
     cursorId = @getIdentifierAtCursor()
 
@@ -78,6 +155,8 @@ module.exports =
 
       return {
         id: cursorId.usages[index],
+        index: index,
+        matches:  cursorId.usages.length,
         pos: cursorId.pos
       }
 
