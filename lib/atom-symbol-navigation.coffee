@@ -94,14 +94,17 @@ module.exports =
   #TODO: cache the results of scope lookups until buffer is changed.
   jumpToUsageOfIdentifier: (params) ->
     next = @getNextUsageOfIdentifier params
-    if next
+    editor = @util.getActiveEditor()
+
+    if next && editor
       #move cursor to next identifier
       loc = next.id.loc
       nextUsage = [loc.start.line - 1, loc.start.column + next.pos]
-      @util.getActiveEditor().setCursorBufferPosition nextUsage
+      editor.setCursorBufferPosition nextUsage
 
-      #update status bar details
+      #update status bar details and highlight scope
       @updateStatusBar "#{next.index+1}/#{next.matches} matches"
+      @highlightScope next.scope, editor
 
   #highlight a scope in a given editor
   highlightScope: (scope, editor) ->
@@ -195,15 +198,11 @@ module.exports =
     for ref in scope.through
       identifiers.push ref.identifier
 
-    #for variables that are resolved in this scope, include
-    #all references to them, including those in inner scopes
-    for ref in scope.references
-      if ref.resolved
-        for varRef in ref.resolved.references
-          identifiers.push varRef.identifier
-
-    #include non-expression declarations
+    #we also want to include resolved variables along with their
+    #references. This include function parameters etc.
     for variable in scope.variables
+      for reference in variable.references
+        identifiers.push reference.identifier
       for identifier in variable.identifiers
         identifiers.push identifier
 
