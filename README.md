@@ -2,6 +2,8 @@
 
 Provides keybindings for scope-sensitive symbol navigation in Javascript files. Supports [ES6](https://people.mozilla.org/~jorendorff/es6-draft.html) block scopes and arrow functions.
 
+If installing as a symlink, be sure to run `npm install` in the root directory to pull in the correct dependencies.
+
 ## Usage
 
 By default the following keybindings are provided:

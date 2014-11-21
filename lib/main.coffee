@@ -3,8 +3,9 @@ symNavStatusBarView = null
 symNavScopeHighlight = null
 
 module.exports =
-  util: require('./util')
-  parser: require('./parser')
+  util: require './util'
+  usageParser: require './usage-parser'
+  definitionParser: require './definition-parser'
 
   activate: (state) ->
     #attach status bar
@@ -18,7 +19,7 @@ module.exports =
 
     #when es6 config option changes, invalidate cache
     atom.workspaceView.subscribe atom.config.observe 'atom-symbol-navigation.es6Support', =>
-      @parser.invalidateScopesCache()
+      @usageParser.invalidateScopesCache()
 
     #attach commands
     atom.workspaceView.command "atom-symbol-navigation:jump-to-next-id", =>
@@ -29,6 +30,9 @@ module.exports =
 
     atom.workspaceView.command "atom-symbol-navigation:select-all-id", =>
       @selectAllIdentifiers()
+
+    atom.workspaceView.command "atom-symbol-navigation:jump-to-id-def", =>
+      @jumpToIdentifierDefinition()
 
     #when active panel changes, erase status text
     atom.workspace.onDidChangeActivePaneItem =>
@@ -42,7 +46,7 @@ module.exports =
         @clearStatusBar()
         @clearHighlight()
       editor.onDidChange =>
-        @parser.invalidateScopesCache editor.getPath()
+        @usageParser.invalidateScopesCache editor.getPath()
 
   #Create status bar view element. Have to wait for packages to load first
   createStatusBarView: ->
@@ -68,6 +72,40 @@ module.exports =
       #update status bar and highlight scope
       @updateStatusBar "#{cursorId.usages.length} matches"
       @highlightScope cursorId.scope, editor
+
+  #jumps to definition of symbol, searching through
+  #import/export tree if not found in root file
+  jumpToIdentifierDefinition: ->
+    search = require './search'
+    editor = @util.getActiveEditor()
+    cursorId = @getIdentifierAtCursor()
+
+    if editor && cursorId
+      symbol = cursorId.id.name
+      path = editor.getPath()
+      scope = cursorId.scope
+      definition = search.findSymbolDefinition symbol, path, scope: scope
+
+      #definition found - if in a different file, open and jump
+      if !definition.error
+        loc = definition.loc
+        bufferPos = [loc.start.line - 1, loc.start.column]
+        range = @util.createRangeFromLocation loc
+
+        if definition.path == path
+          editor.setCursorBufferPosition bufferPos
+          editor.setSelectedBufferRange range
+        else
+          atom.workspace.open(definition.path,
+                                              initialLine: bufferPos[0],
+                                              initialColumn: bufferPos[1],
+                                              activatePane: true,
+                                              searchAllPanes:true)
+                                    .then (opened) =>
+                                      opened.setCursorBufferPosition bufferPos
+                                      opened.setSelectedBufferRange range
+
+    return null
 
   #jumps to the position of the next identifier matching the one
   #at the current cursor. What next means depends on parameters:
@@ -97,7 +135,7 @@ module.exports =
     location = scope.block.loc
     range = @util.createRangeFromLocation location
     marker = editor.markBufferRange range
-    decor = editor.decorateMarker marker, type: 'highlight', class: 'soft-red-highlight'
+    decor = editor.decorateMarker marker, type: 'highlight', class: 'soft-gray-highlight'
     symNavScopeHighlight = decor
 
   #Update out status bar reference
@@ -123,7 +161,7 @@ module.exports =
 
     if editor
       cursorPos = editor.getCursorBufferPosition()
-      parsedScopes = @parser.parseScopesFromBuffer editor.getText(), editor.getPath()
+      parsedScopes = @usageParser.parseScopesFromBuffer editor.getText(), editor.getPath()
       if !parsedScopes then return null
 
       #run through scopes, get identifiers in each

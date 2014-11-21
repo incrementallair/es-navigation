@@ -38,6 +38,7 @@ parseScopesFromBuffer: (buffer, path=null) ->
 
   #if we are given a path, cache results
   if path?
+    
     parseScopesCache.set path, parsedScopes
   return parsedScopes
 
