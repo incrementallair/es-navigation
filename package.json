@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "esprima-fb": "*",
-    "escope": "git://github.com/Constellation/escope.git#master"
+    "escope": "git://github.com/Constellation/escope.git#master",
+    "estraverse": "1.8.0"
   }
 }

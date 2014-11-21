@@ -38,12 +38,13 @@ parseScopesFromBuffer: (buffer, path=null) ->
 
   #if we are given a path, cache results
   if path?
-    
+
     parseScopesCache.set path, parsedScopes
   return parsedScopes
 
 #parse a list of identifiers local to a given scope
 parseIdentifiersFromScope: (scope) ->
+  estraverse = require('estraverse')
   identifiers = []
 
   #we want to include refs to variables that aren't resolved in this scope
@@ -59,6 +60,19 @@ parseIdentifiersFromScope: (scope) ->
       identifiers.push reference.identifier
     for identifier in variable.identifiers
       identifiers.push identifier
+
+  #we also want to include membership expressions, e.g.
+  # object.member = ...
+  #this is not considered a variable reference by escope, as
+  #the member scope is directly tied to the scope of the
+  #object and hence does not need to be considered.
+  estraverse.traverse(scope.block, {
+    enter: (node, parent) =>
+      if node.type == 'MemberExpression'
+        identifier = new Object(node.property)
+        identifier.name = @util.getMemberExpressionString node
+        identifiers.push identifier
+    })
 
   #get rid of duplicates, and sort by position
   identifiers = identifiers.filter (item, index) ->

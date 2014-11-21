@@ -1,4 +1,15 @@
 module.exports =
+
+  #get full string of given esprima membership expression
+  #eg "object.member.submember"
+  getMemberExpressionString: (node) ->
+    if node.type == "Identifier" then return node.name
+    if node.type == "MemberExpression"
+      left = @getMemberExpressionString(node.object)
+      right = @getMemberExpressionString(node.property)
+      return "#{left}.#{right}"
+    return null
+
   #util for working with esprima locs
   #is the given position inside the given location?
   positionIsInsideLocation: (pos, loc) ->

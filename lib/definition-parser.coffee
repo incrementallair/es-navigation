@@ -59,28 +59,24 @@ module.exports =
         if node.type == "ExportDeclaration"
           #export of direct declarations
           if node.declaration
-            name = null
-            loc = null
             switch node.declaration.type
               when "VariableDeclaration"
-                null
-                #for now we don't want to deal  with variables across
-                #module boundaries
-                #name = node.declaration.declarations[0].id.name
+                for declaration in node.declaration.declarations
+                  exportedSymbols.push {
+                    name: declaration.id.name,
+                    loc: declaration.id.loc,
+                    type: "exportDefined"
+                  }
               when "FunctionDeclaration"
-                name = node.declaration.id.name
-                loc = node.declaration.id.loc
+                exportedSymbols.push {
+                  name: node.declaration.id.name,
+                  loc: node.declaration.id.loc,
+                  type: "exportDefined"
+                }
               when "FunctionExpression "
-                #example:
-                #export default function(){}
-                #not sure how to handle yet
+                #a direct function declaration
+                #export function () {}
                 null
-            if name
-              exportedSymbols.push {
-                name: name,
-                loc: loc,
-                type: "exportDefined"
-              }
           else
             for specifier in node.specifiers
               parsedSpec = @parseExportSpecifier specifier
