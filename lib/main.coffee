@@ -7,7 +7,7 @@ module.exports =
   parser: require('./parser')
 
   activate: (state) ->
-    #attach statusbar view
+    #attach status bar
     atom.packages.once 'activated', @createStatusBarView
 
     #set default config options
@@ -15,6 +15,10 @@ module.exports =
       showScopeHighlights: true,
       es6Support: true
     }
+
+    #when es6 config option changes, invalidate cache
+    atom.workspaceView.subscribe atom.config.observe 'atom-symbol-navigation.es6Support', =>
+      @parser.invalidateScopesCache()
 
     #attach commands
     atom.workspaceView.command "atom-symbol-navigation:jump-to-next-id", =>
@@ -25,10 +29,6 @@ module.exports =
 
     atom.workspaceView.command "atom-symbol-navigation:select-all-id", =>
       @selectAllIdentifiers()
-
-    #when es6 config option changes, invalidate cache
-    @subscribe atom.config.observe 'atom-symbol-navigation.es6Support', =>
-      @parser.invalidateScopesCache()
 
     #when active panel changes, erase status text
     atom.workspace.onDidChangeActivePaneItem =>
