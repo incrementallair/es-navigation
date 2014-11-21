@@ -36,7 +36,7 @@ findSymbolDefinition: (symbol, path, params) ->
     #check imports
     for sym in parsedScope.importedSymbols
       if sym.name == symbol
-        return @findSymbolDefinitionInModule symbol, path, sym.loc
+        return @findSymbolDefinitionInModule sym.originalName, path, sym.loc
   else
     #check exported symbols
     for sym in parsedScope.exportedSymbols
@@ -58,7 +58,7 @@ findSymbolDefinition: (symbol, path, params) ->
 #If a symbol is traced to another module, find it
 findSymbolDefinitionInModule: (symbol, basePath, moduleString) ->
   modulePath = @resolveModulePath basePath, moduleString
-
+  console.log "finding #{symbol}"
   if modulePath?
     return @findSymbolDefinition symbol, modulePath, isRoot: false
   else return error: "Couldn't resolve module: #{moduleString} in #{basePath}"

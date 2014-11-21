@@ -21,9 +21,13 @@ module.exports =
           for specifier in node.specifiers
             #parse name from import specification
             parsedSpec = @parseImportSpecifier specifier
-
+            if parsedSpec.originalName?
+              originalName = parsedSpec.originalName
+            else
+              originalName = parsedSpec.name
             if parsedSpec then importedSymbols.push {
-              name: parsedSpec,
+              name: parsedSpec.name,
+              originalName: originalName,
               loc: node.source.value,
               type: "imported"
             }
@@ -104,13 +108,12 @@ module.exports =
         #actually, this could just be implemented as a wormhole =P
 
   #Parse a given import specifier, return name of imported object
-  #TODO: reimplement with some sort of context/Source, rather than just
-  # returning strings. For example: blah.* - how to use?
+  # as {name, [originalName]}
   parseImportSpecifier: (spec) ->
     switch spec.type
-      when "ImportDefaultSpecifier" then return spec.id.name
+      when "ImportDefaultSpecifier" then return name: spec.id.name
       when "ImportSpecifier"
-        if spec.name then return spec.name.name
-        else return spec.id.name
-      when "ImportNamespaceSpecifier" then return spec.id.name + ".*"
+        if spec.name? then return name: spec.name.name, originalName: spec.id.name
+        else return name: spec.id.name
+      when "ImportNamespaceSpecifier" then return name: (spec.id.name + ".*")
       else return null
