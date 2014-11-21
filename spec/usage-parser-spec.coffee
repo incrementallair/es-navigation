@@ -1,9 +1,20 @@
-#Tests for the parser functions in parser.coffee
+#Tests for the usage parser functions in usage-parser.coffee
 fs = require('fs')
-parser = require('../lib/parser')
+parser = require('../lib/usage-parser')
+
+buffer = "var i;
+for (i = 0; i < 3; i++) {
+  function inc() {
+    var tmp = 4;
+
+    function test() {
+      tmp = 3;
+      i = 5;
+    }
+  }
+}"
 
 describe "parser :: parseIdentifiersFromScope", ->
-  buffer = fs.readFileSync 'spec/code-examples/es5-1.js', encoding='utf8'
   parsedScopes = parser.parseScopesFromBuffer buffer
 
   it "correctly parses identifiers from scope", ->
@@ -16,7 +27,6 @@ describe "parser :: parseIdentifiersFromScope", ->
       expect(parsedIds.length).toEqual lengths[index]
 
 describe "parser :: parseScopesFromBuffer", ->
-  buffer = fs.readFileSync 'spec/code-examples/es5-1.js', encoding='utf8'
   parsedScopes = parser.parseScopesFromBuffer buffer
 
   it "correctly parses number of scopes", ->
@@ -32,7 +42,6 @@ describe "parser :: parseScopesFromBuffer", ->
 
 describe "parser :: invalidateScopesCache", ->
   it "correctly caches new parse", ->
-    buffer = fs.readFileSync 'spec/code-examples/es5-1.js', encoding='utf8'
     parsedScopes = parser.parseScopesFromBuffer buffer, "cacheKey"
     expect(parser.getScopesCacheSize()).toEqual 1
 
