@@ -25,8 +25,8 @@ parseScopesFromBuffer: (buffer, path=null) ->
       scopes = escope.analyze(syntaxTree, ecmaVersion: 6).scopes
     else
       scopes = escope.analyze(syntaxTree, ecmaVersion: 5).scopes
-  catch
-    console.error "atom-symbol-navigation: problem parsing  #{path}"
+  catch error
+    console.error "atom-symbol-navigation: problem parsing  #{path} : #{error}"
     return null
 
   #parse out identifiers in each scope
@@ -69,8 +69,14 @@ parseIdentifiersFromScope: (scope) ->
   estraverse.traverse(scope.block, {
     enter: (node, parent) =>
       if node.type == 'MemberExpression'
-        identifier = new Object(node.property)
-        identifier.name = @util.getMemberExpressionString node
+        #create new escope identifier object with prototype inheritance
+        identifier = Object.create(node.property)
+
+        #attach additional member information as instance vars
+        identifier.property = @util.getMemberExpressionString node.property
+        identifier.object = @util.getMemberExpressionString node.object
+        identifier.name = identifier.object + "." + identifier.property
+
         identifiers.push identifier
     })
 

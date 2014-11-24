@@ -5,8 +5,8 @@ module.exports =
   getMemberExpressionString: (node) ->
     if node.type == "Identifier" then return node.name
     if node.type == "MemberExpression"
-      left = @getMemberExpressionString(node.object)
-      right = @getMemberExpressionString(node.property)
+      left = @getMemberExpressionString node.object
+      right = @getMemberExpressionString node.property
       return "#{left}.#{right}"
     return null
 
@@ -43,8 +43,11 @@ module.exports =
     escope = require('escope')
 
     #parse AST and scope list
-    syntaxTree = esprima.parse(buffer, loc: true)
-    scopeList = escope.analyze(syntaxTree).scopes
+    try
+      syntaxTree = esprima.parse(buffer, loc: true)
+      scopeList = escope.analyze(syntaxTree).scopes
+    catch error
+      throw error
 
     return scopeList[0]
 

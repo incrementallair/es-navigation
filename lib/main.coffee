@@ -81,10 +81,20 @@ module.exports =
     cursorId = @getIdentifierAtCursor()
 
     if editor && cursorId
-      symbol = cursorId.id.name
       path = editor.getPath()
       scope = cursorId.scope
-      definition = search.findSymbolDefinition symbol, path, scope: scope
+
+      #is this identifier an object property?
+      #if so, search for the definition in the namespace object (import * as np... etc)
+      if cursorId.id.property?
+        symbol = cursorId.id.property
+        ns = cursorId.id.object
+        definition = search.findSymbolDefinition symbol, path, scope: scope, namespace: ns
+        # if definition.error
+        #   definition = search.findSymbolDefinition ns, path, scope: scope
+      else
+        symbol = cursorId.id.name
+        definition = search.findSymbolDefinition symbol, path, scope: scope
 
       #definition found - if in a different file, open and jump
       if !definition.error
@@ -104,6 +114,8 @@ module.exports =
                                     .then (opened) =>
                                       opened.setCursorBufferPosition bufferPos
                                       opened.setSelectedBufferRange range
+      else
+        console.log("Problem finding definition: #{definition.error}")
 
     return null
 
