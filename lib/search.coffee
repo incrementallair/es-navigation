@@ -88,18 +88,12 @@ findSymbolDefinitionInModule: (symbol, basePath, moduleString) ->
       throw error
   else return error: "Couldn't resolve module: #{moduleString} in #{basePath}"
 
-#TODO: merge in jspm resolver
-#Naive module path resolution, given a base file.
-#returns path of module file if found, null if not
+#Uses an implementation of the node resolver
 resolveModulePath: (basePath, moduleString) ->
-  fs = require('fs')
+  resolve = require('resolve')
   path = require('path')
-  baseDir = path.dirname basePath
 
-  #naive check of base directory
-  naivePath = path.join baseDir, moduleString
-  if !path.extname(naivePath) then naivePath += ".js"
-  if fs.existsSync naivePath
-    return naivePath
-
-  return null
+  basedir = path.dirname basePath
+  try
+    return resolve.sync(moduleString, basedir: basedir, extensions: ['.js', '.es6'])
+  catch error then throw error

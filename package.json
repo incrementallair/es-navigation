@@ -9,8 +9,9 @@
     "atom": ">0.50.0"
   },
   "dependencies": {
-    "esprima-fb": "*",
     "escope": "git://github.com/Constellation/escope.git#master",
-    "estraverse": "1.7.1"
+    "esprima-fb": "*",
+    "estraverse": "1.7.1",
+    "resolve": "^1.0.0"
   }
 }

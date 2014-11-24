@@ -27,7 +27,7 @@ parseScopesFromBuffer: (buffer, path=null) ->
       scopes = escope.analyze(syntaxTree, ecmaVersion: 5).scopes
   catch error
     console.error "atom-symbol-navigation: problem parsing  #{path} : #{error}"
-    return null
+    throw error
 
   #parse out identifiers in each scope
   parsedScopes = scopes.map (scope) =>
