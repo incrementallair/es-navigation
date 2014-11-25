@@ -9,6 +9,7 @@
     util: require('./util'),
     parse: require('./parse'),
     navigate: require('./navigate'),
+    view: require('./view'),
     activate: function(state) {
       atom.packages.once('activated', this.createStatusBarView);
       atom.config.set("atom-symbol-navigation", {
@@ -79,7 +80,7 @@
             editor.addSelectionForBufferRange(range);
           }
           this.updateStatusBar("" + results.references.length + " matches");
-          return this.highlightScope(cursorId.scope, editor);
+          return this.highlightScope(results.scope, editor);
         }
       }
     },

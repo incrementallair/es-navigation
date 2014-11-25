@@ -6,6 +6,7 @@ module.exports =
   util: require './util'
   parse: require './parse'
   navigate: require './navigate'
+  view: require './view'
 
   activate: (state) ->
     #attach status bar
@@ -73,7 +74,7 @@ module.exports =
 
         #update status bar and highlight scope
         @updateStatusBar "#{results.references.length} matches"
-        @highlightScope cursorId.scope, editor
+        @highlightScope results.scope, editor
 
   #jumps to definition of symbol, searching through
   #import/export tree if not found in root file
