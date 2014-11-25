@@ -13,7 +13,7 @@ var $__esprima_45_fb__,
 var esprima = ($__esprima_45_fb__ = require("esprima-fb"), $__esprima_45_fb__ && $__esprima_45_fb__.__esModule && $__esprima_45_fb__ || {default: $__esprima_45_fb__}).default;
 var escope = ($__escope__ = require("escope"), $__escope__ && $__escope__.__esModule && $__escope__ || {default: $__escope__}).default;
 var estraverse = ($__estraverse__ = require("estraverse"), $__estraverse__ && $__estraverse__.__esModule && $__estraverse__ || {default: $__estraverse__}).default;
-var util = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}).default;
+var getMemberExpressionString = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}).getMemberExpressionString;
 ;
 function parseBuffer(buffer) {
   var scopes;
@@ -214,8 +214,8 @@ function decorateReferencedSymbols(scope) {
   estraverse.traverse(scope.block, {enter: (function(node, parent) {
       if (node.type == 'MemberExpression') {
         var identifier = Object.create(node.property);
-        identifier.property = util.getMemberExpressionString(node.property);
-        identifier.object = util.getMemberExpressionString(node.object);
+        identifier.property = getMemberExpressionString(node.property);
+        identifier.object = getMemberExpressionString(node.object);
         identifier.name = identifier.object + "." + identifier.property;
         scope.referencedSymbols.push(identifier);
       }
