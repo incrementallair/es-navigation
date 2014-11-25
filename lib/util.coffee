@@ -20,6 +20,17 @@ module.exports =
     return true
 
   #util for working with esprima locs
+  #is location a contained within location b?
+  containedWithin: (a, b) ->
+    if (a.start.line < b.start.line) then return false
+    if (a.end.line > b.end.line) then return false
+    if (a.start.line == b.start.line)
+      if (a.start.column < b.start.column) then return false
+    if (a.end.line == b.end.line)
+      if (a.end.column > b.end.column) then return false
+    return true
+
+  #util for working with esprima locs
   #comparator function for two identifiers by location
   #compares only start positions of the locations
   compareIdentifierLocations: (a, b) ->

@@ -8,4 +8,4 @@ export {x};
 export {v as x};
 export {foo} from "mod";
 export {bar as bar2} from "mod";
-export * from "mod";
+export * from "mod"

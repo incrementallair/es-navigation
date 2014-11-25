@@ -52,7 +52,7 @@ module.exports =
   createStatusBarView: ->
     statusBar = atom.workspaceView.statusBar
     if statusBar && !symNavStatusBarView
-      StatusBarView = require './status-bar-view'
+      StatusBarView = require './status-bar'
 
       symNavStatusBarView = new StatusBarView()
       symNavStatusBarView.initialize statusBar
@@ -62,6 +62,10 @@ module.exports =
   selectAllIdentifiers: ->
     editor = @util.getActiveEditor()
     cursorId = @getIdentifierAtCursor()
+
+    #TODO TODO
+    test = require './parse'
+    console.log test.parseBuffer(editor.getText())
 
     if cursorId && editor
       #match exists, select all
