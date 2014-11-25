@@ -7,19 +7,14 @@
 
   module.exports = {
     util: require('./util'),
-    usageParser: require('./usage-parser'),
-    definitionParser: require('./definition-parser'),
+    parse: require('./parse'),
     activate: function(state) {
       atom.packages.once('activated', this.createStatusBarView);
       atom.config.set("atom-symbol-navigation", {
         showScopeHighlights: true,
         es6Support: true
       });
-      atom.workspaceView.subscribe(atom.config.observe('atom-symbol-navigation.es6Support', (function(_this) {
-        return function() {
-          return _this.usageParser.invalidateScopesCache();
-        };
-      })(this)));
+      atom.workspaceView.subscribe(atom.config.observe('atom-symbol-navigation.es6Support', function() {}));
       atom.workspaceView.command("atom-symbol-navigation:jump-to-next-id", (function(_this) {
         return function() {
           return _this.jumpToUsageOfIdentifier({
@@ -55,9 +50,7 @@
             _this.clearStatusBar();
             return _this.clearHighlight();
           });
-          return editor.onDidChange(function() {
-            return _this.usageParser.invalidateScopesCache(editor.getPath());
-          });
+          return editor.onDidChange(function() {});
         };
       })(this));
     },
@@ -168,12 +161,11 @@
       return this.updateStatusBar('');
     },
     getIdentifierAtCursor: function() {
-      var cursorIds, cursorPos, editor, identifiers, parse, parsedScope, parsedScopes, usages, _i, _len;
+      var cursorIds, cursorPos, editor, identifiers, parsedScope, parsedScopes, usages, _i, _len;
       editor = this.util.getActiveEditor();
       if (editor) {
         cursorPos = editor.getCursorBufferPosition();
-        parse = require('./parse');
-        parsedScopes = parse.parseBuffer(editor.getText());
+        parsedScopes = this.parse.parseBuffer(editor.getText());
         if (!parsedScopes) {
           return null;
         }

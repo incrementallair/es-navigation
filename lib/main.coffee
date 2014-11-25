@@ -4,8 +4,7 @@ symNavScopeHighlight = null
 
 module.exports =
   util: require './util'
-  usageParser: require './usage-parser'
-  definitionParser: require './definition-parser'
+  parse: require './parse'
 
   activate: (state) ->
     #attach status bar
@@ -18,8 +17,8 @@ module.exports =
     }
 
     #when es6 config option changes, invalidate cache
-    atom.workspaceView.subscribe atom.config.observe 'atom-symbol-navigation.es6Support', =>
-      @usageParser.invalidateScopesCache()
+    atom.workspaceView.subscribe atom.config.observe 'atom-symbol-navigation.es6Support', ->
+      #TODO: Caching mechanism
 
     #attach commands
     atom.workspaceView.command "atom-symbol-navigation:jump-to-next-id", =>
@@ -45,8 +44,8 @@ module.exports =
       editor.onDidChangeCursorPosition =>
         @clearStatusBar()
         @clearHighlight()
-      editor.onDidChange =>
-        @usageParser.invalidateScopesCache editor.getPath()
+      editor.onDidChange ->
+        #TODO caching mechanism
 
   #Create status bar view element. Have to wait for packages to load first
   createStatusBarView: ->
@@ -171,9 +170,7 @@ module.exports =
 
     if editor
       cursorPos = editor.getCursorBufferPosition()
-      #parsedScopes = @usageParser.parseScopesFromBuffer editor.getText(), editor.getPath()
-      parse = require('./parse')
-      parsedScopes = parse.parseBuffer editor.getText()
+      parsedScopes = @parse.parseBuffer editor.getText()
       if !parsedScopes then return null
 
       #run through scopes, get identifiers in each
