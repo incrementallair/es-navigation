@@ -8,6 +8,7 @@
   module.exports = {
     util: require('./util'),
     parse: require('./parse'),
+    navigate: require('./navigate'),
     activate: function(state) {
       atom.packages.once('activated', this.createStatusBarView);
       atom.config.set("atom-symbol-navigation", {
@@ -65,18 +66,21 @@
       }
     },
     selectAllIdentifiers: function() {
-      var cursorId, editor, id, range, _i, _len, _ref;
+      var cursor, editor, range, reference, results, _i, _len, _ref;
       editor = this.util.getActiveEditor();
-      cursorId = this.getIdentifierAtCursor();
-      if (cursorId && editor) {
-        _ref = cursorId.usages;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          id = _ref[_i];
-          range = this.util.createRangeFromLocation(id.loc);
-          editor.addSelectionForBufferRange(range);
+      if (editor != null) {
+        cursor = editor.getCursorBufferPosition();
+        results = this.navigate.getReferencesAtPosition(editor.getText(), editor.getPath(), cursor);
+        if (results != null) {
+          _ref = results.references;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            reference = _ref[_i];
+            range = this.util.createRangeFromLocation(reference.loc);
+            editor.addSelectionForBufferRange(range);
+          }
+          this.updateStatusBar("" + results.references.length + " matches");
+          return this.highlightScope(cursorId.scope, editor);
         }
-        this.updateStatusBar("" + cursorId.usages.length + " matches");
-        return this.highlightScope(cursorId.scope, editor);
       }
     },
     jumpToIdentifierDefinition: function() {

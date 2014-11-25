@@ -5,6 +5,7 @@ symNavScopeHighlight = null
 module.exports =
   util: require './util'
   parse: require './parse'
+  navigate: require './navigate'
 
   activate: (state) ->
     #attach status bar
@@ -60,17 +61,19 @@ module.exports =
   #Multiselects all identifiers in scope matching cursor
   selectAllIdentifiers: ->
     editor = @util.getActiveEditor()
-    cursorId = @getIdentifierAtCursor()
 
-    if cursorId && editor
-      #match exists, select all
-      for id in cursorId.usages
-        range = @util.createRangeFromLocation id.loc
-        editor.addSelectionForBufferRange range
+    if editor?
+      cursor = editor.getCursorBufferPosition()
+      results = @navigate.getReferencesAtPosition(editor.getText(), editor.getPath(), cursor)
 
-      #update status bar and highlight scope
-      @updateStatusBar "#{cursorId.usages.length} matches"
-      @highlightScope cursorId.scope, editor
+      if results?
+        for reference in results.references
+          range = @util.createRangeFromLocation reference.loc
+          editor.addSelectionForBufferRange range
+
+        #update status bar and highlight scope
+        @updateStatusBar "#{results.references.length} matches"
+        @highlightScope cursorId.scope, editor
 
   #jumps to definition of symbol, searching through
   #import/export tree if not found in root file
