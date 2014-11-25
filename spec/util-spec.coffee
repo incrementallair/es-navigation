@@ -1,5 +1,5 @@
 #Tests for util.coffee
-util = require('../lib/util')
+util = require('../build/util')
 
 posA = { row: 1, column: 1 }
 

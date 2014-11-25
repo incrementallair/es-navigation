@@ -90,20 +90,12 @@ function findSymbolDefinition(symbol, path) {
   }
   console.error("Unable to resolve " + symbol + " in " + path);
   return null;
-  function findInModule(symbol, basePath, moduleString) {
-    var modulePath;
+  function findInModule(symbol, basePath, moduleRequest) {
     try {
-      modulePath = resolveModulePath(basePath, moduleString);
+      return findSymbolDefinition(symbol, moduleRequest, null, false);
     } catch (error) {
-      console.error("Couldn't resolve " + moduleString + " from " + basePath);
+      console.error("Couldn't find " + symbol + " in " + moduleRequest);
       return null;
     }
-    try {
-      return findSymbolDefinition(symbol, modulePath, null, false);
-    } catch (error) {
-      console.error("Couldn't find " + symbol + " in " + modulePath);
-      return null;
-    }
-    return null;
   }
 }

@@ -40,7 +40,6 @@ function parseBuffer(buffer, path) {
   scopes.map(decorateImportedSymbols);
   scopes.map(decorateExportedSymbols);
   scopes.map(decorateDefinedSymbols);
-  console.log(scopes);
   return scopes;
 }
 function decorateExportedSymbols(scope) {
