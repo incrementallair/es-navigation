@@ -19,11 +19,21 @@ function parseBuffer(buffer) {
   var scopes;
   try {
     var syntaxTree = esprima.parse(buffer, {loc: true});
-    scopes = escope.analyze(syntaxTree).scopes;
+    var es6Support = atom.config.get("atom-symbol-navigation.es6Support");
+    if (es6Support)
+      scopes = escope.analyze(syntaxTree, {ecmaVersion: 6}).scopes;
+    else
+      scopes = escope.analyze(syntaxTree, {ecmaVersion: 5}).scopes;
   } catch (error) {
     console.error("Error parsing AST/scopes: " + error);
     return null;
   }
+  scopes.map((function(scope) {
+    scope.referencedSymbols = [];
+    scope.importedSymbols = [];
+    scope.exportedSymbols = [];
+    scope.definedSymbols = [];
+  }));
   scopes.map(decorateReferencedSymbols);
   scopes.map(decorateImportedSymbols);
   scopes.map(decorateExportedSymbols);
@@ -31,7 +41,6 @@ function parseBuffer(buffer) {
   return scopes;
 }
 function decorateExportedSymbols(scope) {
-  scope.exportedSymbols = [];
   estraverse.traverse(scope.block, {enter: (function(node, parent) {
       if (node.type == "ExportDeclaration") {
         if (node.declaration) {
@@ -108,7 +117,6 @@ function decorateExportedSymbols(scope) {
   }
 }
 function decorateDefinedSymbols(scope) {
-  scope.definedSymbols = [];
   for (var $__6 = scope.variables[$traceurRuntime.toProperty(Symbol.iterator)](),
       $__7; !($__7 = $__6.next()).done; ) {
     var variable = $__7.value;
@@ -128,7 +136,6 @@ function decorateDefinedSymbols(scope) {
   }
 }
 function decorateImportedSymbols(scope) {
-  scope.importedSymbols = [];
   estraverse.traverse(scope.block, {enter: (function(node, parent) {
       if (node.type == "ImportDeclaration") {
         for (var $__4 = node.specifiers[$traceurRuntime.toProperty(Symbol.iterator)](),
@@ -175,7 +182,6 @@ function decorateImportedSymbols(scope) {
   }
 }
 function decorateReferencedSymbols(scope) {
-  scope.referencedSymbols = [];
   for (var $__4 = scope.through[$traceurRuntime.toProperty(Symbol.iterator)](),
       $__5; !($__5 = $__4.next()).done; ) {
     var reference = $__5.value;
