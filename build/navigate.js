@@ -3,6 +3,9 @@ Object.defineProperties(exports, {
   getReferencesAtPosition: {get: function() {
       return getReferencesAtPosition;
     }},
+  getDefinitionAtPosition: {get: function() {
+      return getDefinitionAtPosition;
+    }},
   getNextReference: {get: function() {
       return getNextReference;
     }},
@@ -19,15 +22,16 @@ var parseBuffer = ($__parse__ = require("./parse"), $__parse__ && $__parse__.__e
 var findSymbolDefinition = ($__search__ = require("./search"), $__search__ && $__search__.__esModule && $__search__ || {default: $__search__}).findSymbolDefinition;
 ;
 ;
+;
 function getDefinitionAtPosition(buffer, path, position) {
   var $__5 = getReferencesAtPosition(buffer, path, position),
       id = $__5.id,
       scope = $__5.scope;
   if (id && scope) {
     if (id.property && id.object)
-      return getReferencesAtPosition(id.property, path, id.object, true, scope);
+      return findSymbolDefinition(id.property, path, id.object, true, scope);
     else
-      return getReferencesAtPosition(id.name, path, null, true, scope);
+      return findSymbolDefinition(id.name, path, null, true, scope);
   }
 }
 function getReferencesAtPosition(buffer, path, position) {
@@ -38,7 +42,7 @@ function getReferencesAtPosition(buffer, path, position) {
       var scope = $__4.value;
       {
         var references = getReferencesAtPositionInScope(scope, position);
-        if (references) {
+        if (references.id && references.references) {
           references.scope = scope;
           return references;
         }
@@ -48,6 +52,10 @@ function getReferencesAtPosition(buffer, path, position) {
   return null;
 }
 function getReferencesAtPositionInScope(scope, position) {
+  var results = {
+    id: null,
+    references: null
+  };
   var identifiers = scope.referencedSymbols;
   var id = identifiers.filter((function(node) {
     return positionIsInsideLocation(position, node.loc);
@@ -56,16 +64,15 @@ function getReferencesAtPositionInScope(scope, position) {
     var references = identifiers.filter((function(node) {
       return node.name == id.name;
     })).sort(compareIdentifierLocations);
-    return {
-      id: id,
-      references: references
-    };
+    results.id = id;
+    results.references = references;
   }
-  return null;
+  return results;
 }
 function getNextReference(id, references) {
+  var skip = arguments[2] !== (void 0) ? arguments[2] : 1;
   var index = references.indexOf(id);
   if (index >= 0)
-    return references[(index + references.length) % references.length];
+    return references[(index + references.length + skip) % references.length];
   return null;
 }

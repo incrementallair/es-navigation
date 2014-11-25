@@ -9,6 +9,9 @@ Object.defineProperties(exports, {
   toDefinition: {get: function() {
       return toDefinition;
     }},
+  clearHighlight: {get: function() {
+      return clearHighlight;
+    }},
   __esModule: {value: true}
 });
 var $__util__,
@@ -22,6 +25,7 @@ var $__0 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && 
 var getReferencesAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getReferencesAtPosition;
 var getNextReference = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getNextReference;
 var getDefinitionAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getDefinitionAtPosition;
+;
 ;
 ;
 ;
@@ -57,7 +61,8 @@ function selectAllIdentifiers() {
     var cursor = editor.getCursorBufferPosition();
     var $__6 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
         id = $__6.id,
-        references = $__6.references;
+        references = $__6.references,
+        scope = $__6.scope;
     if (references && id) {
       for (var $__4 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
           $__5; !($__5 = $__4.next()).done; ) {
@@ -67,23 +72,24 @@ function selectAllIdentifiers() {
           editor.addSelectionForBufferRange(range);
         }
       }
-      highlightScope(id.scope, editor);
+      highlightScope(scope, editor);
     }
   }
 }
-function toNextIdentifier(params) {
+function toNextIdentifier() {
+  var skip = arguments[0] !== (void 0) ? arguments[0] : 1;
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
     var $__6 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
         id = $__6.id,
-        references = $__6.references;
+        references = $__6.references,
+        scope = $__6.scope;
     if (id && references) {
-      var next = getNextReference(id, references);
-      var loc = next.id.loc;
-      var nextPosition = [loc.start.line - 1, loc.start.column + next.pos];
+      var next = getNextReference(id, references, skip);
+      var nextPosition = [next.loc.start.line - 1, next.loc.start.column];
       editor.setCursorBufferPosition(nextPosition);
-      highlightScope(next.scope, editor);
+      highlightScope(scope, editor);
     }
   }
 }
@@ -98,10 +104,11 @@ function highlightScope(scope, editor) {
   range[1][1] = 0;
   range[1][0]++;
   var marker = editor.markBufferRange(range);
-  var decor = editor.decorateMarker(marker, {
+  var highlight = editor.decorateMarker(marker, {
     type: 'highlight',
     class: 'soft-gray-highlight'
   });
+  currentHighlight = highlight;
 }
 function clearHighlight() {
   if (currentHighlight) {

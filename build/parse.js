@@ -40,7 +40,18 @@ function parseBuffer(buffer, path) {
   scopes.map(decorateImportedSymbols);
   scopes.map(decorateExportedSymbols);
   scopes.map(decorateDefinedSymbols);
+  scopes.map((function(scope) {
+    removeDuplicates(scope.referencedSymbols);
+    removeDuplicates(scope.definedSymbols);
+    removeDuplicates(scope.importedSymbols);
+    removeDuplicates(scope.exportedSymbols);
+  }));
   return scopes;
+  function removeDuplicates(array) {
+    array = array.filter((function(value, ind) {
+      return array.indexOf(value) == ind;
+    }));
+  }
 }
 function decorateExportedSymbols(scope) {
   estraverse.traverse(scope.block, {enter: (function(node, parent) {
