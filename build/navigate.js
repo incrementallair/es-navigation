@@ -25,8 +25,10 @@ function getReferencesAtPosition(buffer, path, position) {
       var scope = $__3.value;
       {
         var references = getReferencesAtPositionInScope(scope, position);
-        if (references)
+        if (references) {
+          references.scope = scope;
           return references;
+        }
       }
     }
   }

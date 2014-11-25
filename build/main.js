@@ -84,20 +84,20 @@
       }
     },
     jumpToIdentifierDefinition: function() {
-      var bufferPos, cursorId, definition, editor, loc, ns, path, range, scope, search, symbol;
+      var bufferPos, cursor, definition, editor, loc, ns, path, range, results, search, symbol;
       search = require('./search');
       editor = this.util.getActiveEditor();
-      cursorId = this.getIdentifierAtCursor();
-      if (editor && cursorId) {
+      if (editor) {
         path = editor.getPath();
-        scope = cursorId.scope;
-        if (cursorId.id.property != null) {
-          symbol = cursorId.id.property;
-          ns = cursorId.id.object;
-          definition = search.findSymbolDefinition(symbol, path, ns, true, scope);
+        cursor = editor.getCursorBufferPosition();
+        results = this.navigate.getReferencesAtPosition(editor.getText(), path, cursor);
+        if (results.id.property != null) {
+          symbol = results.id.property;
+          ns = results.id.object;
+          definition = search.findSymbolDefinition(symbol, path, ns, true, results.scope);
         } else {
-          symbol = cursorId.id.name;
-          definition = search.findSymbolDefinition(symbol, path, null, true, scope);
+          symbol = results.id.name;
+          definition = search.findSymbolDefinition(symbol, path, null, true, results.scope);
         }
         if (definition) {
           loc = definition.loc;

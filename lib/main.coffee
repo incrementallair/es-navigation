@@ -80,23 +80,23 @@ module.exports =
   jumpToIdentifierDefinition: ->
     search = require './search'
     editor = @util.getActiveEditor()
-    cursorId = @getIdentifierAtCursor()
 
-    if editor && cursorId
+    if editor
       path = editor.getPath()
-      scope = cursorId.scope
+      cursor = editor.getCursorBufferPosition()
+      results = @navigate.getReferencesAtPosition(editor.getText(), path, cursor)
 
       #is this identifier an object property?
       #if so, search for the definition in the namespace object (import * as np... etc)
-      if cursorId.id.property?
-        symbol = cursorId.id.property
-        ns = cursorId.id.object
-        definition = search.findSymbolDefinition(symbol, path, ns, true, scope)
+      if results.id.property?
+        symbol = results.id.property
+        ns = results.id.object
+        definition = search.findSymbolDefinition(symbol, path, ns, true, results.scope)
         # if definition.error
         #   definition = search.findSymbolDefinition ns, path, scope: scope
       else
-        symbol = cursorId.id.name
-        definition = search.findSymbolDefinition(symbol, path, null, true, scope)
+        symbol = results.id.name
+        definition = search.findSymbolDefinition(symbol, path, null, true, results.scope)
 
       #definition found - if in a different file, open and jump
       if definition
