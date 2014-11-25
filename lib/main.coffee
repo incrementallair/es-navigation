@@ -97,7 +97,6 @@ module.exports =
         definition = search.findSymbolDefinition(symbol, path, null, true, scope)
 
       #definition found - if in a different file, open and jump
-      console.log definition
       if definition
         loc = definition.loc
         bufferPos = [loc.start.line - 1, loc.start.column]

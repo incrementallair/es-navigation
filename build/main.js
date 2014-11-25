@@ -102,7 +102,6 @@
           symbol = cursorId.id.name;
           definition = search.findSymbolDefinition(symbol, path, null, true, scope);
         }
-        console.log(definition);
         if (definition) {
           loc = definition.loc;
           bufferPos = [loc.start.line - 1, loc.start.column];

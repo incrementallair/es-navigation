@@ -44,7 +44,7 @@ function decorateExportedSymbols(scope) {
   estraverse.traverse(scope.block, {enter: (function(node, parent) {
       if (node.type == "ExportDeclaration") {
         if (node.declaration) {
-          var parsedDecl = parseExportDeclaration(node);
+          var parsedDecl = parseExportDeclaration(node, scope);
           if (parsedDecl)
             scope.exportedSymbols.push(parsedDecl);
         } else {
@@ -52,7 +52,7 @@ function decorateExportedSymbols(scope) {
               $__5; !($__5 = $__4.next()).done; ) {
             var specifier = $__5.value;
             {
-              var parsedSpec = parseExportSpecifier(specifier, node);
+              var parsedSpec = parseExportSpecifier(specifier, node, scope);
               if (parsedSpec)
                 scope.exportedSymbols.push(parsedSpec);
             }
@@ -60,7 +60,7 @@ function decorateExportedSymbols(scope) {
         }
       }
     })});
-  function parseExportDeclaration(decl) {
+  function parseExportDeclaration(decl, scope) {
     var result = {
       localName: null,
       exportName: null,
@@ -72,10 +72,12 @@ function decorateExportedSymbols(scope) {
     if (decl.declaration.type == "VariableDeclaration") {
       result.exportName = decl.declaration.declarations[0].id.name;
       result.localName = result.exportName;
+      scope.referencedSymbols.push(decl.declaration.declarations[0].id);
     } else {
       if (decl.declaration.id) {
         result.exportName = decl.declaration.id.name;
         result.localName = result.exportName;
+        scope.referencedSymbols.push(decl.declaration.id);
       } else
         result.localName = "*default*";
     }
@@ -85,7 +87,7 @@ function decorateExportedSymbols(scope) {
       result.exportName = "default";
     return result;
   }
-  function parseExportSpecifier(spec, node) {
+  function parseExportSpecifier(spec, node, scope) {
     var result = {
       importName: null,
       exportName: null,
@@ -101,6 +103,7 @@ function decorateExportedSymbols(scope) {
         } else
           result.localName = spec.id.name;
         result.exportName = spec.name ? spec.name.name : spec.id.name;
+        scope.referencedSymbols.push(spec.id);
         break;
       case "ExportBatchSpecifier":
         if (!node.source) {
@@ -125,6 +128,8 @@ function decorateDefinedSymbols(scope) {
           $__5; !($__5 = $__4.next()).done; ) {
         var definition = $__5.value;
         {
+          if (!definition.name)
+            continue;
           scope.definedSymbols.push({
             localName: definition.name.name,
             location: definition.name.loc,
@@ -142,7 +147,7 @@ function decorateImportedSymbols(scope) {
             $__5; !($__5 = $__4.next()).done; ) {
           var specifier = $__5.value;
           {
-            var parsedSpec = parseImportSpecifier(specifier);
+            var parsedSpec = parseImportSpecifier(specifier, scope);
             if (parsedSpec) {
               parsedSpec.moduleRequest = node.source.value;
               scope.importedSymbols.push(parsedSpec);
@@ -151,7 +156,7 @@ function decorateImportedSymbols(scope) {
         }
       }
     })});
-  function parseImportSpecifier(spec) {
+  function parseImportSpecifier(spec, scope) {
     var parsedSpec = {
       importName: null,
       localName: null,
@@ -162,14 +167,17 @@ function decorateImportedSymbols(scope) {
       case "ImportDefaultSpecifier":
         parsedSpec.importName = "default";
         parsedSpec.localName = spec.id.name;
+        scope.referencedSymbols.push(spec.id);
         break;
       case "ImportSpecifier":
-        parsedSpec.localName = spec.name ? spec.name.name : spec.id.name;
         parsedSpec.importName = spec.id.name;
+        parsedSpec.localName = spec.name ? spec.name.name : spec.id.name;
+        scope.referencedSymbols.push(spec.name ? spec.name : spec.id);
         break;
       case "ImportNamespaceSpecifier":
         parsedSpec.importName = "*";
         parsedSpec.localName = spec.id.name;
+        scope.referencedSymbols.push(spec.id);
         break;
       default:
         console.error("Unknown import specifier type: " + spec.type);
