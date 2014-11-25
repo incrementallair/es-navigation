@@ -165,7 +165,7 @@
       editor = this.util.getActiveEditor();
       if (editor) {
         cursorPos = editor.getCursorBufferPosition();
-        parsedScopes = this.parse.parseBuffer(editor.getText());
+        parsedScopes = this.parse.parseBuffer(editor.getText(), editor.getPath());
         if (!parsedScopes) {
           return null;
         }

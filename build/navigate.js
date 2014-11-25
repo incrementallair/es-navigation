@@ -8,11 +8,9 @@ Object.defineProperties(exports, {
     }},
   __esModule: {value: true}
 });
-var $__util__,
-    $__parse__;
+var $__util__;
 'use strict';
 var util = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}).default;
-var parseBuffer = ($__parse__ = require("./parse"), $__parse__ && $__parse__.__esModule && $__parse__ || {default: $__parse__}).parseBuffer;
 ;
 ;
 function getReferencesAtPosition(scope, position) {

@@ -170,7 +170,7 @@ module.exports =
 
     if editor
       cursorPos = editor.getCursorBufferPosition()
-      parsedScopes = @parse.parseBuffer editor.getText()
+      parsedScopes = @parse.parseBuffer editor.getText(), editor.getPath()
       if !parsedScopes then return null
 
       #run through scopes, get identifiers in each
