@@ -9,18 +9,20 @@ var $__esprima_45_fb__,
     $__escope__,
     $__estraverse__,
     $__util__;
+'use strict';
 var esprima = ($__esprima_45_fb__ = require("esprima-fb"), $__esprima_45_fb__ && $__esprima_45_fb__.__esModule && $__esprima_45_fb__ || {default: $__esprima_45_fb__}).default;
 var escope = ($__escope__ = require("escope"), $__escope__ && $__escope__.__esModule && $__escope__ || {default: $__escope__}).default;
 var estraverse = ($__estraverse__ = require("estraverse"), $__estraverse__ && $__estraverse__.__esModule && $__estraverse__ || {default: $__estraverse__}).default;
 var util = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}).default;
 ;
 function parseBuffer(buffer) {
+  var scopes;
   try {
     var syntaxTree = esprima.parse(buffer, {loc: true});
-    var scopes = escope.analyze(syntaxTree).scopes;
+    scopes = escope.analyze(syntaxTree).scopes;
   } catch (error) {
-    console.error("Error parsing AST/scopes: #{error}");
-    throw error;
+    console.error("Error parsing AST/scopes: " + error);
+    return null;
   }
   scopes.map(decorateReferencedSymbols);
   scopes.map(decorateImportedSymbols);
@@ -93,14 +95,14 @@ function decorateExportedSymbols(scope) {
         break;
       case "ExportBatchSpecifier":
         if (!node.source) {
-          console.log("Error: parsing export batch specifier without module source");
+          console.error("Error: parsing export batch specifier without module source");
           return null;
         }
         result.importName = "*";
         result.moduleRequest = node.source.value;
         break;
       default:
-        console.log("Unknown export specifier type: #{spec.type}");
+        console.error("Unknown export specifier type: " + spec.type);
     }
     return result;
   }
@@ -163,7 +165,7 @@ function decorateImportedSymbols(scope) {
         parsedSpec.localName = spec.id.name;
         break;
       default:
-        console.error("Unknown import specifier type: #{spec.type}");
+        console.error("Unknown import specifier type: " + spec.type);
     }
     if (parsedSpec.importName && parsedSpec.localName) {
       parsedSpec.location = spec.id.loc;

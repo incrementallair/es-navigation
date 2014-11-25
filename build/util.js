@@ -64,21 +64,6 @@
     createRangeFromLocation: function(loc) {
       return [[loc.start.line - 1, loc.start.column], [loc.end.line - 1, loc.end.column]];
     },
-    getGlobalScope: function(buffer) {
-      var error, escope, esprima, scopeList, syntaxTree;
-      esprima = require('esprima-fb');
-      escope = require('escope');
-      try {
-        syntaxTree = esprima.parse(buffer, {
-          loc: true
-        });
-        scopeList = escope.analyze(syntaxTree).scopes;
-      } catch (_error) {
-        error = _error;
-        throw error;
-      }
-      return scopeList[0];
-    },
     getActiveEditor: function() {
       return atom.workspace.getActiveTextEditor();
     }

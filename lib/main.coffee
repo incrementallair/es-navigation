@@ -63,10 +63,6 @@ module.exports =
     editor = @util.getActiveEditor()
     cursorId = @getIdentifierAtCursor()
 
-    #TODO TODO
-    test = require './parse'
-    console.log test.parseBuffer(editor.getText())
-
     if cursorId && editor
       #match exists, select all
       for id in cursorId.usages
@@ -93,15 +89,16 @@ module.exports =
       if cursorId.id.property?
         symbol = cursorId.id.property
         ns = cursorId.id.object
-        definition = search.findSymbolDefinition symbol, path, scope: scope, namespace: ns
+        definition = search.findSymbolDefinition(symbol, path, ns, true, scope)
         # if definition.error
         #   definition = search.findSymbolDefinition ns, path, scope: scope
       else
         symbol = cursorId.id.name
-        definition = search.findSymbolDefinition symbol, path, scope: scope
+        definition = search.findSymbolDefinition(symbol, path, null, true, scope)
 
       #definition found - if in a different file, open and jump
-      if !definition.error
+      console.log definition
+      if definition
         loc = definition.loc
         bufferPos = [loc.start.line - 1, loc.start.column]
         range = @util.createRangeFromLocation loc
@@ -118,8 +115,6 @@ module.exports =
                                     .then (opened) =>
                                       opened.setCursorBufferPosition bufferPos
                                       opened.setSelectedBufferRange range
-      else
-        console.log("Problem finding definition: #{definition.error}")
 
     return null
 
@@ -177,14 +172,16 @@ module.exports =
 
     if editor
       cursorPos = editor.getCursorBufferPosition()
-      parsedScopes = @usageParser.parseScopesFromBuffer editor.getText(), editor.getPath()
+      #parsedScopes = @usageParser.parseScopesFromBuffer editor.getText(), editor.getPath()
+      parse = require('./parse')
+      parsedScopes = parse.parseBuffer editor.getText()
       if !parsedScopes then return null
 
       #run through scopes, get identifiers in each
       #if we find one at the cursor position, look
       #for the next identifier
       for parsedScope in parsedScopes
-        identifiers = parsedScope.identifiers
+        identifiers = parsedScope.referencedSymbols
         cursorIds = identifiers.filter (node) =>
           @util.positionIsInsideLocation(cursorPos, node.loc)
 
@@ -197,7 +194,7 @@ module.exports =
             id: cursorIds[0],
             pos: cursorPos.column - cursorIds[0].loc.start.column,
             usages: usages,
-            scope: parsedScope.scope
+            scope: parsedScope
           }
     return null
 

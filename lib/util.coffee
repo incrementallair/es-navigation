@@ -48,20 +48,6 @@ module.exports =
       [loc.end.line - 1, loc.end.column]
     ]
 
-  #Parses global Escope object from buffer
-  getGlobalScope: (buffer) ->
-    esprima = require('esprima-fb')
-    escope = require('escope')
-
-    #parse AST and scope list
-    try
-      syntaxTree = esprima.parse(buffer, loc: true)
-      scopeList = escope.analyze(syntaxTree).scopes
-    catch error
-      throw error
-
-    return scopeList[0]
-
   #get active text editor, or return null
   getActiveEditor: ->
     atom.workspace.getActiveTextEditor()

@@ -72,11 +72,9 @@
       }
     },
     selectAllIdentifiers: function() {
-      var cursorId, editor, id, range, test, _i, _len, _ref;
+      var cursorId, editor, id, range, _i, _len, _ref;
       editor = this.util.getActiveEditor();
       cursorId = this.getIdentifierAtCursor();
-      test = require('./parse');
-      console.log(test.parseBuffer(editor.getText()));
       if (cursorId && editor) {
         _ref = cursorId.usages;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -99,17 +97,13 @@
         if (cursorId.id.property != null) {
           symbol = cursorId.id.property;
           ns = cursorId.id.object;
-          definition = search.findSymbolDefinition(symbol, path, {
-            scope: scope,
-            namespace: ns
-          });
+          definition = search.findSymbolDefinition(symbol, path, ns, true, scope);
         } else {
           symbol = cursorId.id.name;
-          definition = search.findSymbolDefinition(symbol, path, {
-            scope: scope
-          });
+          definition = search.findSymbolDefinition(symbol, path, null, true, scope);
         }
-        if (!definition.error) {
+        console.log(definition);
+        if (definition) {
           loc = definition.loc;
           bufferPos = [loc.start.line - 1, loc.start.column];
           range = this.util.createRangeFromLocation(loc);
@@ -129,8 +123,6 @@
               };
             })(this));
           }
-        } else {
-          console.log("Problem finding definition: " + definition.error);
         }
       }
       return null;
@@ -177,17 +169,18 @@
       return this.updateStatusBar('');
     },
     getIdentifierAtCursor: function() {
-      var cursorIds, cursorPos, editor, identifiers, parsedScope, parsedScopes, usages, _i, _len;
+      var cursorIds, cursorPos, editor, identifiers, parse, parsedScope, parsedScopes, usages, _i, _len;
       editor = this.util.getActiveEditor();
       if (editor) {
         cursorPos = editor.getCursorBufferPosition();
-        parsedScopes = this.usageParser.parseScopesFromBuffer(editor.getText(), editor.getPath());
+        parse = require('./parse');
+        parsedScopes = parse.parseBuffer(editor.getText());
         if (!parsedScopes) {
           return null;
         }
         for (_i = 0, _len = parsedScopes.length; _i < _len; _i++) {
           parsedScope = parsedScopes[_i];
-          identifiers = parsedScope.identifiers;
+          identifiers = parsedScope.referencedSymbols;
           cursorIds = identifiers.filter((function(_this) {
             return function(node) {
               return _this.util.positionIsInsideLocation(cursorPos, node.loc);
@@ -201,7 +194,7 @@
               id: cursorIds[0],
               pos: cursorPos.column - cursorIds[0].loc.start.column,
               usages: usages,
-              scope: parsedScope.scope
+              scope: parsedScope
             };
           }
         }
