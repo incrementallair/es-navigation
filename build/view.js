@@ -12,6 +12,9 @@ Object.defineProperties(exports, {
   clearHighlight: {get: function() {
       return clearHighlight;
     }},
+  clearStatusBar: {get: function() {
+      return clearStatusBar;
+    }},
   createStatusBarView: {get: function() {
       return createStatusBarView;
     }},
@@ -30,6 +33,7 @@ var $__1 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && 
 var getReferencesAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getReferencesAtPosition;
 var getNextReference = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getNextReference;
 var getDefinitionAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getDefinitionAtPosition;
+;
 ;
 ;
 ;
@@ -131,4 +135,7 @@ function clearHighlight() {
     currentHighlight.getMarker().destroy();
     currentHighlight = null;
   }
+}
+function clearStatusBar() {
+  ourStatusBar.updateText('');
 }
