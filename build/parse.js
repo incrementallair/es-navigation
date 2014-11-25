@@ -21,7 +21,7 @@ function parseBuffer(buffer, path) {
   var scopes;
   try {
     var syntaxTree = esprima.parse(buffer, {loc: true});
-    if (atom.config.get("atom-symbol-navigation.es6Support"))
+    if (atom.config.get("ecmascript-navigation.es6Support"))
       scopes = escope.analyze(syntaxTree, {ecmaVersion: 6}).scopes;
     else
       scopes = escope.analyze(syntaxTree, {ecmaVersion: 5}).scopes;

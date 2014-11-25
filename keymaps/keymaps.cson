@@ -1,5 +1,5 @@
 '.editor':
-  'ctrl-alt-n': 'atom-symbol-navigation:jump-to-next-id'
-  'ctrl-alt-p': 'atom-symbol-navigation:jump-to-prev-id'
-  'ctrl-alt-d': 'atom-symbol-navigation:select-all-id'
-  'ctrl-alt-0': 'atom-symbol-navigation:jump-to-id-def'
+  'ctrl-alt-n': 'ecmascript-navigation:next-symbol'
+  'ctrl-alt-p': 'ecmascript-navigation:previous-symbol'
+  'ctrl-alt-a': 'ecmascript-navigation:select-all-id'
+  'ctrl-alt-0': 'ecmascript-navigation:jump-to-definition-file'

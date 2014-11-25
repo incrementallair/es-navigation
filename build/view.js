@@ -116,7 +116,7 @@ function createStatusBarView() {
 var currentHighlight = null;
 function highlightScope(scope, editor) {
   clearHighlight();
-  if (!atom.config.get("atom-symbol-navigation.showScopeHighlights"))
+  if (!atom.config.get("ecmascript-navigation.showScopeHighlights"))
     return;
   var location = scope.block.loc;
   var range = createRangeFromLocation(location);

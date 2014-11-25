@@ -1,8 +1,8 @@
 {
-  "name": "atom-symbol-navigation",
+  "name": "ecmascript-navigation",
   "main": "./build/index",
   "version": "0.0.0",
-  "description": "Scope-sensitive navigation between javascript symbols.",
+  "description": "Scope-sensitive navigation tools for javascript. Includes ES6 support.",
   "repository": "https://github.com/incrementallair/atom-symbol-navigation",
   "license": "MIT",
   "engines": {
