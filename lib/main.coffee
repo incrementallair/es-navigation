@@ -1,7 +1,3 @@
-#notification references - scope highlighting and status bar
-symNavStatusBarView = null
-symNavScopeHighlight = null
-
 module.exports =
   util: require './util'
   parse: require './parse'
@@ -10,7 +6,7 @@ module.exports =
 
   activate: (state) ->
     #attach status bar
-    atom.packages.once 'activated', @createStatusBarView
+    atom.packages.once 'activated', => @view.createStatusBarView()
 
     #set default config options
     atom.config.set "atom-symbol-navigation", {
@@ -37,14 +33,14 @@ module.exports =
 
     #when active panel changes, erase status text
     atom.workspace.onDidChangeActivePaneItem =>
-      @clearStatusBar()
+      #@clearStatusBar()
 
     #when text editors are edited, add
     #  status bar erasing when cursor moves
     #  cache invalidation when content changes
     atom.workspace.observeTextEditors (editor) =>
       editor.onDidChangeCursorPosition =>
-        @clearStatusBar()
+        #@clearStatusBar()
         #clearHighlight()
       editor.onDidChange ->
         #TODO caching mechanism

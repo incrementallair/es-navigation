@@ -41,14 +41,14 @@ function parseBuffer(buffer, path) {
   scopes.map(decorateExportedSymbols);
   scopes.map(decorateDefinedSymbols);
   scopes.map((function(scope) {
-    removeDuplicates(scope.referencedSymbols);
-    removeDuplicates(scope.definedSymbols);
-    removeDuplicates(scope.importedSymbols);
-    removeDuplicates(scope.exportedSymbols);
+    scope.referencedSymbols = removeDuplicates(scope.referencedSymbols);
+    scope.definedSymbols = removeDuplicates(scope.definedSymbols);
+    scope.importedSymbols = removeDuplicates(scope.importedSymbols);
+    scope.exportedSymbols = removeDuplicates(scope.exportedSymbols);
   }));
   return scopes;
   function removeDuplicates(array) {
-    array = array.filter((function(value, ind) {
+    return array.filter((function(value, ind) {
       return array.indexOf(value) == ind;
     }));
   }

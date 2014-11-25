@@ -1,17 +1,15 @@
 (function() {
-  var symNavScopeHighlight, symNavStatusBarView;
-
-  symNavStatusBarView = null;
-
-  symNavScopeHighlight = null;
-
   module.exports = {
     util: require('./util'),
     parse: require('./parse'),
     navigate: require('./navigate'),
     view: require('./view'),
     activate: function(state) {
-      atom.packages.once('activated', this.createStatusBarView);
+      atom.packages.once('activated', (function(_this) {
+        return function() {
+          return _this.view.createStatusBarView();
+        };
+      })(this));
       atom.config.set("atom-symbol-navigation", {
         showScopeHighlights: true,
         es6Support: true
@@ -38,21 +36,17 @@
         };
       })(this));
       atom.workspace.onDidChangeActivePaneItem((function(_this) {
-        return function() {
-          return _this.clearStatusBar();
-        };
+        return function() {};
       })(this));
       return atom.workspace.observeTextEditors((function(_this) {
         return function(editor) {
-          editor.onDidChangeCursorPosition(function() {
-            return _this.clearStatusBar();
-          });
+          editor.onDidChangeCursorPosition(function() {});
           return editor.onDidChange(function() {});
         };
       })(this));
     },
     createStatusBarView: function() {
-      var StatusBarView, statusBar;
+      var StatusBarView, statusBar, symNavStatusBarView;
       statusBar = atom.workspaceView.statusBar;
       if (statusBar && !symNavStatusBarView) {
         StatusBarView = require('./status-bar');
@@ -62,7 +56,7 @@
       }
     },
     updateStatusBar: function(text) {
-      if (symNavStatusBarView != null) {
+      if (typeof symNavStatusBarView !== "undefined" && symNavStatusBarView !== null) {
         return symNavStatusBarView.updateText(text);
       }
     },

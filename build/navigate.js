@@ -49,7 +49,11 @@ function getReferencesAtPosition(buffer, path, position) {
       }
     }
   }
-  return null;
+  return {
+    id: null,
+    references: null,
+    scope: null
+  };
 }
 function getReferencesAtPositionInScope(scope, position) {
   var results = {

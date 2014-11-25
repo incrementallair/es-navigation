@@ -12,19 +12,25 @@ Object.defineProperties(exports, {
   clearHighlight: {get: function() {
       return clearHighlight;
     }},
+  createStatusBarView: {get: function() {
+      return createStatusBarView;
+    }},
   __esModule: {value: true}
 });
-var $__util__,
+var $__status_45_bar__,
+    $__util__,
     $__navigate__,
     $__navigate__,
     $__navigate__;
 'use strict';
-var $__0 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
-    getActiveEditor = $__0.getActiveEditor,
-    createRangeFromLocation = $__0.createRangeFromLocation;
+var StatusBarView = ($__status_45_bar__ = require("./status-bar"), $__status_45_bar__ && $__status_45_bar__.__esModule && $__status_45_bar__ || {default: $__status_45_bar__}).default;
+var $__1 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
+    getActiveEditor = $__1.getActiveEditor,
+    createRangeFromLocation = $__1.createRangeFromLocation;
 var getReferencesAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getReferencesAtPosition;
 var getNextReference = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getNextReference;
 var getDefinitionAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getDefinitionAtPosition;
+;
 ;
 ;
 ;
@@ -59,19 +65,20 @@ function selectAllIdentifiers() {
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
-    var $__6 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
-        id = $__6.id,
-        references = $__6.references,
-        scope = $__6.scope;
+    var $__7 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
+        id = $__7.id,
+        references = $__7.references,
+        scope = $__7.scope;
     if (references && id) {
-      for (var $__4 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__5; !($__5 = $__4.next()).done; ) {
-        var reference = $__5.value;
+      for (var $__5 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
+          $__6; !($__6 = $__5.next()).done; ) {
+        var reference = $__6.value;
         {
           var range = createRangeFromLocation(reference.loc);
           editor.addSelectionForBufferRange(range);
         }
       }
+      ourStatusBar.updateText(references.length + " matches");
       highlightScope(scope, editor);
     }
   }
@@ -81,16 +88,25 @@ function toNextIdentifier() {
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
-    var $__6 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
-        id = $__6.id,
-        references = $__6.references,
-        scope = $__6.scope;
+    var $__7 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
+        id = $__7.id,
+        references = $__7.references,
+        scope = $__7.scope;
     if (id && references) {
       var next = getNextReference(id, references, skip);
       var nextPosition = [next.loc.start.line - 1, next.loc.start.column];
       editor.setCursorBufferPosition(nextPosition);
       highlightScope(scope, editor);
     }
+  }
+}
+var ourStatusBar = null;
+function createStatusBarView() {
+  var statusBar = atom.workspaceView.statusBar;
+  if (statusBar && !ourStatusBar) {
+    ourStatusBar = new StatusBarView();
+    ourStatusBar.initialize(statusBar);
+    ourStatusBar.attach();
   }
 }
 var currentHighlight = null;
