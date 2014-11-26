@@ -1,7 +1,8 @@
 "use strict";
 var $__view__,
     $__view__,
-    $__view__;
+    $__view__,
+    $__cache__;
 'use strict';
 var $__0 = ($__view__ = require("./view"), $__view__ && $__view__.__esModule && $__view__ || {default: $__view__}),
     toNextIdentifier = $__0.toNextIdentifier,
@@ -12,14 +13,16 @@ var $__1 = ($__view__ = require("./view"), $__view__ && $__view__.__esModule && 
 var $__2 = ($__view__ = require("./view"), $__view__ && $__view__.__esModule && $__view__ || {default: $__view__}),
     createStatusBarView = $__2.createStatusBarView,
     clearStatusBar = $__2.clearStatusBar,
-    clearHighlight = $__2.clearHighlight;
+    clearHighlight = $__2.clearHighlight,
+    clearToggles = $__2.clearToggles;
+var clearCache = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).clearCache;
 module.exports = {activate: function(state) {
     atom.packages.once('activated', createStatusBarView);
     atom.config.set("ecmascript-navigation", {
       showScopeHighlights: true,
       es6Support: true
     });
-    atom.workspaceView.subscribe(atom.config.observe('ecmascript-navigation.es6Support', function() {}));
+    atom.workspaceView.subscribe(atom.config.observe('ecmascript-navigation.es6Support', clearCache));
     atom.workspaceView.command("ecmascript-navigation:next-symbol", (function() {
       toNextIdentifier(1);
     }));
@@ -34,6 +37,7 @@ module.exports = {activate: function(state) {
       editor.onDidChangeCursorPosition((function() {
         clearStatusBar();
         clearHighlight();
+        clearToggles();
       }));
     }));
   }};

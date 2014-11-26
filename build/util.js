@@ -19,8 +19,15 @@ Object.defineProperties(exports, {
   getActiveEditor: {get: function() {
       return getActiveEditor;
     }},
+  jumpToPositionFrom: {get: function() {
+      return jumpToPositionFrom;
+    }},
+  jumpToLocationFrom: {get: function() {
+      return jumpToLocationFrom;
+    }},
   __esModule: {value: true}
 });
+;
 ;
 ;
 ;
@@ -77,4 +84,38 @@ function createRangeFromLocation(loc) {
 }
 function getActiveEditor() {
   return atom.workspace.getActiveTextEditor();
+}
+function jumpToLocationFrom(location, path, editor) {
+  var toggle = arguments[3] !== (void 0) ? arguments[3] : null;
+  var range = createRangeFromLocation(location);
+  var position = [location.start.line - 1, location.start.column];
+  jumpToPositionFrom(position, path, editor, range, toggle);
+}
+function jumpToPositionFrom(position, path, editor) {
+  var range = arguments[3] !== (void 0) ? arguments[3] : null;
+  var toggle = arguments[4] !== (void 0) ? arguments[4] : null;
+  var previousCursor = editor.getCursorBufferPosition();
+  var previousPath = editor.getPath();
+  if (path == editor.getPath()) {
+    editor.setCursorBufferPosition(position);
+    if (range)
+      editor.setSelectedBufferRange(range);
+    if (toggle) {
+      toggle.position = previousCursor;
+      toggle.path = previousPath;
+    }
+  } else {
+    atom.workspace.open(path, {
+      activatePane: true,
+      searchAllPanes: true
+    }).then((function(openedEditor) {
+      openedEditor.setCursorBufferPosition(position);
+      if (range)
+        openedEditor.setSelectedBufferRange(range);
+      if (toggle) {
+        toggle.position = previousCursor;
+        toggle.path = previousPath;
+      }
+    }));
+  }
 }

@@ -18,12 +18,16 @@ Object.defineProperties(exports, {
   clearStatusBar: {get: function() {
       return clearStatusBar;
     }},
+  clearToggles: {get: function() {
+      return clearToggles;
+    }},
   createStatusBarView: {get: function() {
       return createStatusBarView;
     }},
   __esModule: {value: true}
 });
 var $__status_45_bar__,
+    $__util__,
     $__util__,
     $__navigate__,
     $__navigate__,
@@ -34,6 +38,9 @@ var StatusBarView = ($__status_45_bar__ = require("./status-bar"), $__status_45_
 var $__1 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
     getActiveEditor = $__1.getActiveEditor,
     createRangeFromLocation = $__1.createRangeFromLocation;
+var $__2 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
+    jumpToPositionFrom = $__2.jumpToPositionFrom,
+    jumpToLocationFrom = $__2.jumpToLocationFrom;
 var getReferencesAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getReferencesAtPosition;
 var getNextReference = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getNextReference;
 var getDefinitionAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getDefinitionAtPosition;
@@ -45,72 +52,49 @@ var getInFileDefinitionAtPosition = ($__navigate__ = require("./navigate"), $__n
 ;
 ;
 ;
+;
+var toDefinitionToggle = {};
 function toDefinition() {
   var editor = getActiveEditor();
   if (editor) {
+    if (toDefinitionToggle.position && toDefinitionToggle.path) {
+      jumpToPositionFrom(toDefinitionToggle.position, toDefinitionToggle.path, editor);
+      toDefinitionToggle.position = null;
+      return;
+    }
     var cursor = editor.getCursorBufferPosition();
     var definition = getDefinitionAtPosition(editor.getText(), editor.getPath(), cursor);
-    var relativePosition = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}).relativePosition;
-    if (definition && relativePosition) {
-      var loc = definition.loc;
-      var range = createRangeFromLocation(loc);
-      var position = [loc.start.line - 1, loc.start.column];
-      if (definition.path == editor.getPath()) {
-        editor.setCursorBufferPosition(position);
-        editor.setSelectedBufferRange(range);
-      } else {
-        atom.workspace.open(definition.path, {
-          activatePane: true,
-          searchAllPanes: true
-        }).then((function(openedEditor) {
-          openedEditor.setCursorBufferPosition(position);
-          openedEditor.setSelectedBufferRange(range);
-        }));
-      }
-    }
+    if (definition)
+      jumpToLocationFrom(definition.loc, definition.path, editor, toDefinitionToggle);
   }
 }
+var toInFileDefinitionToggle = {};
 function toInFileDefinition() {
   var editor = getActiveEditor();
   if (editor) {
-    var cursor = editor.getCursorBufferPosition();
-    var definition = getInFileDefinitionAtPosition(editor.getText(), editor.getPath(), cursor);
-    if (definition) {
-      var range = createRangeFromLocation(definition);
-      var position = [definition.start.line - 1, definition.start.column];
-      editor.setCursorBufferPosition(position);
-      editor.setSelectedBufferRange(range);
+    if (toInFileDefinitionToggle.position && toInFileDefinitionToggle.path) {
+      jumpToPositionFrom(toInFileDefinitionToggle.position, toInFileDefinitionToggle.path, editor);
+      toInFileDefinitionToggle.position = null;
+      return;
     }
-  }
-}
-function jumpToLocationFrom(location, path, editor) {
-  var range = createRangeFromLocation(location);
-  var position = [location.start.line - 1, location.start.column];
-  if (path == editor.getPath()) {
-    editor.setCursorBufferPosition(position);
-    editor.setSelectedBufferRange(range);
-  } else {
-    atom.workspace.open(path, {
-      activatePane: true,
-      searchAllPanes: true
-    }).then((function(openedEditor) {
-      openedEditor.setCursorBufferPosition(position);
-      openedEditor.setSelectedBufferRange(range);
-    }));
+    var cursor = editor.getCursorBufferPosition();
+    var location = getInFileDefinitionAtPosition(editor.getText(), editor.getPath(), cursor);
+    if (location)
+      jumpToLocationFrom(location, editor.getPath(), editor, toInFileDefinitionToggle);
   }
 }
 function selectAllIdentifiers() {
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
-    var $__8 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
-        id = $__8.id,
-        references = $__8.references,
-        scope = $__8.scope;
+    var $__9 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
+        id = $__9.id,
+        references = $__9.references,
+        scope = $__9.scope;
     if (references && id) {
-      for (var $__6 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__7; !($__7 = $__6.next()).done; ) {
-        var reference = $__7.value;
+      for (var $__7 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
+          $__8; !($__8 = $__7.next()).done; ) {
+        var reference = $__8.value;
         {
           var range = createRangeFromLocation(reference.loc);
           editor.addSelectionForBufferRange(range);
@@ -126,11 +110,11 @@ function toNextIdentifier() {
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
-    var $__8 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}),
-        id = $__8.id,
-        references = $__8.references,
-        scope = $__8.scope,
-        relativePosition = $__8.relativePosition;
+    var $__9 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}),
+        id = $__9.id,
+        references = $__9.references,
+        scope = $__9.scope,
+        relativePosition = $__9.relativePosition;
     if (id && references) {
       var next = getNextReference(id, references, skip);
       var nextPosition = [next.loc.start.line - 1, next.loc.start.column + relativePosition];
@@ -173,4 +157,8 @@ function clearHighlight() {
 }
 function clearStatusBar() {
   ourStatusBar.updateText('');
+}
+function clearToggles() {
+  toInFileDefinitionToggle.position = null;
+  toDefinitionToggle.position = null;
 }

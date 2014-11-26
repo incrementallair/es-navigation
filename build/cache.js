@@ -3,6 +3,9 @@ Object.defineProperties(exports, {
   parseBuffer: {get: function() {
       return parseBuffer;
     }},
+  clearCache: {get: function() {
+      return clearCache;
+    }},
   __esModule: {value: true}
 });
 var $__parse__,
@@ -31,4 +34,7 @@ function parseBuffer(buffer, path) {
   function hashBuffer(buffer) {
     return yshash.hash(buffer);
   }
+}
+function clearCache() {
+  parseCache.clear();
 }

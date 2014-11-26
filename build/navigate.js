@@ -46,10 +46,12 @@ function getInFileDefinitionAtPosition(buffer, path, position) {
       id = $__5.id,
       imports = $__5.imports,
       definitions = $__5.definitions;
-  if (definitions.length > 0)
-    return definitions[0].location;
-  if (imports.length > 0)
-    return imports[0].location;
+  if (id) {
+    if (definitions.length > 0)
+      return definitions[0].location;
+    if (imports.length > 0)
+      return imports[0].location;
+  }
   return null;
 }
 function getReferencesAtPosition(buffer, path, position) {
