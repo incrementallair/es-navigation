@@ -12,13 +12,13 @@ Object.defineProperties(exports, {
   __esModule: {value: true}
 });
 var $__util__,
-    $__parse__,
+    $__cache__,
     $__search__;
 'use strict';
 var $__0 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
     positionIsInsideLocation = $__0.positionIsInsideLocation,
     compareIdentifierLocations = $__0.compareIdentifierLocations;
-var parseBuffer = ($__parse__ = require("./parse"), $__parse__ && $__parse__.__esModule && $__parse__ || {default: $__parse__}).parseBuffer;
+var parseBuffer = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).parseBuffer;
 var findSymbolDefinition = ($__search__ = require("./search"), $__search__ && $__search__.__esModule && $__search__ || {default: $__search__}).findSymbolDefinition;
 ;
 ;
