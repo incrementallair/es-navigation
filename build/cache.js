@@ -19,7 +19,7 @@ function parseBuffer(buffer, path) {
     if (cache.hash == hash)
       return cache.data;
   }
-  var parsedBuffer = _parseBuffer(buffer);
+  var parsedBuffer = _parseBuffer(buffer, path);
   if (parsedBuffer) {
     parseCache.set(path, {
       data: parsedBuffer,

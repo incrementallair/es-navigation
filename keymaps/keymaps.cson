@@ -2,4 +2,5 @@
   'ctrl-alt-n': 'ecmascript-navigation:next-symbol'
   'ctrl-alt-p': 'ecmascript-navigation:previous-symbol'
   'ctrl-alt-a': 'ecmascript-navigation:select-all-id'
+  'ctrl-alt-d': 'ecmascript-navigation:jump-to-definition'
   'ctrl-alt-0': 'ecmascript-navigation:jump-to-definition-file'
