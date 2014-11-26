@@ -21,11 +21,11 @@ Object.defineProperties(exports, {
   clearToggles: {get: function() {
       return clearToggles;
     }},
-  highlightModules: {get: function() {
-      return highlightModules;
-    }},
   clearModuleHighlights: {get: function() {
       return clearModuleHighlights;
+    }},
+  highlightImport: {get: function() {
+      return highlightImport;
     }},
   createStatusBarView: {get: function() {
       return createStatusBarView;
@@ -34,6 +34,7 @@ Object.defineProperties(exports, {
 });
 var $__status_45_bar__,
     $__cache__,
+    $__util__,
     $__util__,
     $__util__,
     $__navigate__,
@@ -49,6 +50,7 @@ var $__2 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && 
 var $__3 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
     jumpToPositionFrom = $__3.jumpToPositionFrom,
     jumpToLocationFrom = $__3.jumpToLocationFrom;
+var positionIsInsideLocation = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}).positionIsInsideLocation;
 var getReferencesAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getReferencesAtPosition;
 var getNextReference = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getNextReference;
 var getDefinitionAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getDefinitionAtPosition;
@@ -62,7 +64,6 @@ var toDefinitionToggle = {};
 function toDefinition() {
   var editor = getActiveEditor();
   if (editor) {
-    highlightModules(editor);
     if (toDefinitionToggle.position && toDefinitionToggle.path) {
       jumpToPositionFrom(toDefinitionToggle.position, toDefinitionToggle.path, editor);
       toDefinitionToggle.position = null;
@@ -78,7 +79,6 @@ var toInFileDefinitionToggle = {};
 function toInFileDefinition() {
   var editor = getActiveEditor();
   if (editor) {
-    highlightModules(editor);
     if (toInFileDefinitionToggle.position && toInFileDefinitionToggle.path) {
       jumpToPositionFrom(toInFileDefinitionToggle.position, toInFileDefinitionToggle.path, editor);
       toInFileDefinitionToggle.position = null;
@@ -93,16 +93,15 @@ function toInFileDefinition() {
 function selectAllIdentifiers() {
   var editor = getActiveEditor();
   if (editor) {
-    highlightModules(editor);
     var cursor = editor.getCursorBufferPosition();
-    var $__10 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
-        id = $__10.id,
-        references = $__10.references,
-        scope = $__10.scope;
+    var $__11 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
+        id = $__11.id,
+        references = $__11.references,
+        scope = $__11.scope;
     if (references && id) {
-      for (var $__8 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__9; !($__9 = $__8.next()).done; ) {
-        var reference = $__9.value;
+      for (var $__9 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
+          $__10; !($__10 = $__9.next()).done; ) {
+        var reference = $__10.value;
         {
           var range = createRangeFromLocation(reference.loc);
           editor.addSelectionForBufferRange(range);
@@ -110,6 +109,7 @@ function selectAllIdentifiers() {
       }
       ourStatusBar.updateText(references.length + " matches");
       highlightScope(scope, editor);
+      highlightImport(editor, {symbol: id});
     }
   }
 }
@@ -117,17 +117,20 @@ function toNextIdentifier() {
   var skip = arguments[0] !== (void 0) ? arguments[0] : 1;
   var editor = getActiveEditor();
   if (editor) {
-    highlightModules(editor);
     var cursor = editor.getCursorBufferPosition();
-    var $__10 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}),
-        id = $__10.id,
-        references = $__10.references,
-        scope = $__10.scope,
-        relativePosition = $__10.relativePosition;
+    var $__11 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}),
+        id = $__11.id,
+        references = $__11.references,
+        scope = $__11.scope,
+        relativePosition = $__11.relativePosition;
     if (id && references) {
       var next = getNextReference(id, references, skip);
       var nextPosition = [next.loc.start.line - 1, next.loc.start.column + relativePosition];
       editor.setCursorBufferPosition(nextPosition);
+      highlightImport(editor, {
+        symbol: id,
+        position: editor.getCursorBufferPosition()
+      });
       highlightScope(scope, editor);
     }
   }
@@ -141,36 +144,57 @@ function createStatusBarView() {
     ourStatusBar.attach();
   }
 }
-var moduleHighlights = [];
-function highlightModules(editor) {
+function highlightImport(editor, params) {
   var scopes = parseBuffer(editor.getText(), editor.getPath());
-  if (scopes) {
-    var scope = scopes[0];
-    var highlightModule = (function(symbol) {
-      if (symbol.moduleLocation) {
-        var cssClass = "module-resolved";
-        if (symbol.moduleRequest == "notFound")
-          cssClass = "module-not-found";
-        if (symbol.moduleRequest == "parseError")
-          cssClass = "module-parse-error";
-        var range = createRangeFromLocation(symbol.moduleLocation);
-        var marker = editor.markBufferRange(range);
-        var highlight = editor.decorateMarker(marker, {
-          type: 'highlight',
-          class: cssClass
-        });
-        moduleHighlights.push(highlight);
+  if (!scopes)
+    return;
+  var scope = scopes[0];
+  for (var $__9 = scope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+      $__10; !($__10 = $__9.next()).done; ) {
+    var symbol = $__10.value;
+    {
+      var match = false;
+      if (params.symbol && symbol.localName == params.symbol.name)
+        match = true;
+      if (params.position && positionIsInsideLocation(params.position, symbol.importLocation))
+        match = true;
+      if (match) {
+        highlightModuleSymbol(editor, symbol);
+        return;
       }
-    });
-    scope.importedSymbols.map(highlightModule);
-    scope.exportedSymbols.map(highlightModule);
+    }
   }
 }
-function clearModuleHighlights() {
-  moduleHighlights.map((function(highlight) {
-    highlight.getMarker().destroy();
-  }));
-  moduleHighlights = [];
+var moduleHighlights = new Map();
+function highlightModuleSymbol(editor, symbol) {
+  var path = editor.getPath();
+  if (!moduleHighlights.has(path))
+    moduleHighlights.set(path, []);
+  clearModuleHighlights(path);
+  if (symbol.moduleLocation) {
+    var cssClass = "module-resolved";
+    if (symbol.moduleRequest == "notFound")
+      cssClass = "module-not-found";
+    if (symbol.moduleRequest == "parseError")
+      cssClass = "module-parse-error";
+    var range = createRangeFromLocation(symbol.moduleLocation);
+    var marker = editor.markBufferRange(range);
+    var highlight = editor.decorateMarker(marker, {
+      type: 'highlight',
+      class: cssClass
+    });
+    moduleHighlights.get(path).push(highlight);
+  }
+}
+function clearModuleHighlights(path) {
+  if (moduleHighlights.has(path)) {
+    for (var $__9 = moduleHighlights.get(path)[$traceurRuntime.toProperty(Symbol.iterator)](),
+        $__10; !($__10 = $__9.next()).done; ) {
+      var highlight = $__10.value;
+      highlight.getMarker().destroy();
+    }
+    moduleHighlights[path] = [];
+  }
 }
 var currentHighlight = null;
 function highlightScope(scope, editor) {

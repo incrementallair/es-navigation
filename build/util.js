@@ -1,5 +1,4 @@
 "use strict";
-'use strict';
 Object.defineProperties(exports, {
   getMemberExpressionString: {get: function() {
       return getMemberExpressionString;
@@ -27,6 +26,9 @@ Object.defineProperties(exports, {
     }},
   __esModule: {value: true}
 });
+var $__view__;
+'use strict';
+var highlightImport = ($__view__ = require("./view"), $__view__ && $__view__.__esModule && $__view__ || {default: $__view__}).highlightImport;
 ;
 ;
 ;
@@ -49,10 +51,12 @@ function positionIsInsideLocation(pos, loc) {
     return false;
   if (pos.row > loc.end.line - 1)
     return false;
-  if (pos.column < loc.start.column)
-    return false;
-  if (pos.column > loc.end.column)
-    return false;
+  if (pos.row == loc.start.line - 1)
+    if (pos.column < loc.start.column)
+      return false;
+  if (pos.row == loc.end.line - 1)
+    if (pos.column > loc.end.column)
+      return false;
   return true;
 }
 function containedWithin(a, b) {
@@ -104,6 +108,7 @@ function jumpToPositionFrom(position, path, editor) {
       toggle.position = previousCursor;
       toggle.path = previousPath;
     }
+    highlightImport(editor, {position: editor.getCursorBufferPosition()});
   } else {
     atom.workspace.open(path, {
       activatePane: true,
