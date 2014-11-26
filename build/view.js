@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperties(exports, {
-  selectAllIdentifiers: {get: function() {
-      return selectAllIdentifiers;
-    }},
   toNextIdentifier: {get: function() {
       return toNextIdentifier;
+    }},
+  selectAllIdentifiers: {get: function() {
+      return selectAllIdentifiers;
     }},
   toDefinition: {get: function() {
       return toDefinition;
@@ -21,12 +21,19 @@ Object.defineProperties(exports, {
   clearToggles: {get: function() {
       return clearToggles;
     }},
+  highlightModules: {get: function() {
+      return highlightModules;
+    }},
+  clearModuleHighlights: {get: function() {
+      return clearModuleHighlights;
+    }},
   createStatusBarView: {get: function() {
       return createStatusBarView;
     }},
   __esModule: {value: true}
 });
 var $__status_45_bar__,
+    $__cache__,
     $__util__,
     $__util__,
     $__navigate__,
@@ -35,12 +42,13 @@ var $__status_45_bar__,
     $__navigate__;
 'use strict';
 var StatusBarView = ($__status_45_bar__ = require("./status-bar"), $__status_45_bar__ && $__status_45_bar__.__esModule && $__status_45_bar__ || {default: $__status_45_bar__}).default;
-var $__1 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
-    getActiveEditor = $__1.getActiveEditor,
-    createRangeFromLocation = $__1.createRangeFromLocation;
+var parseBuffer = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).parseBuffer;
 var $__2 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
-    jumpToPositionFrom = $__2.jumpToPositionFrom,
-    jumpToLocationFrom = $__2.jumpToLocationFrom;
+    getActiveEditor = $__2.getActiveEditor,
+    createRangeFromLocation = $__2.createRangeFromLocation;
+var $__3 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
+    jumpToPositionFrom = $__3.jumpToPositionFrom,
+    jumpToLocationFrom = $__3.jumpToLocationFrom;
 var getReferencesAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getReferencesAtPosition;
 var getNextReference = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getNextReference;
 var getDefinitionAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getDefinitionAtPosition;
@@ -50,13 +58,11 @@ var getInFileDefinitionAtPosition = ($__navigate__ = require("./navigate"), $__n
 ;
 ;
 ;
-;
-;
-;
 var toDefinitionToggle = {};
 function toDefinition() {
   var editor = getActiveEditor();
   if (editor) {
+    highlightModules(editor);
     if (toDefinitionToggle.position && toDefinitionToggle.path) {
       jumpToPositionFrom(toDefinitionToggle.position, toDefinitionToggle.path, editor);
       toDefinitionToggle.position = null;
@@ -72,6 +78,7 @@ var toInFileDefinitionToggle = {};
 function toInFileDefinition() {
   var editor = getActiveEditor();
   if (editor) {
+    highlightModules(editor);
     if (toInFileDefinitionToggle.position && toInFileDefinitionToggle.path) {
       jumpToPositionFrom(toInFileDefinitionToggle.position, toInFileDefinitionToggle.path, editor);
       toInFileDefinitionToggle.position = null;
@@ -86,15 +93,16 @@ function toInFileDefinition() {
 function selectAllIdentifiers() {
   var editor = getActiveEditor();
   if (editor) {
+    highlightModules(editor);
     var cursor = editor.getCursorBufferPosition();
-    var $__9 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
-        id = $__9.id,
-        references = $__9.references,
-        scope = $__9.scope;
+    var $__10 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
+        id = $__10.id,
+        references = $__10.references,
+        scope = $__10.scope;
     if (references && id) {
-      for (var $__7 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__8; !($__8 = $__7.next()).done; ) {
-        var reference = $__8.value;
+      for (var $__8 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
+          $__9; !($__9 = $__8.next()).done; ) {
+        var reference = $__9.value;
         {
           var range = createRangeFromLocation(reference.loc);
           editor.addSelectionForBufferRange(range);
@@ -109,12 +117,13 @@ function toNextIdentifier() {
   var skip = arguments[0] !== (void 0) ? arguments[0] : 1;
   var editor = getActiveEditor();
   if (editor) {
+    highlightModules(editor);
     var cursor = editor.getCursorBufferPosition();
-    var $__9 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}),
-        id = $__9.id,
-        references = $__9.references,
-        scope = $__9.scope,
-        relativePosition = $__9.relativePosition;
+    var $__10 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}),
+        id = $__10.id,
+        references = $__10.references,
+        scope = $__10.scope,
+        relativePosition = $__10.relativePosition;
     if (id && references) {
       var next = getNextReference(id, references, skip);
       var nextPosition = [next.loc.start.line - 1, next.loc.start.column + relativePosition];
@@ -131,6 +140,37 @@ function createStatusBarView() {
     ourStatusBar.initialize(statusBar);
     ourStatusBar.attach();
   }
+}
+var moduleHighlights = [];
+function highlightModules(editor) {
+  var scopes = parseBuffer(editor.getText(), editor.getPath());
+  if (scopes) {
+    var scope = scopes[0];
+    var highlightModule = (function(symbol) {
+      if (symbol.moduleLocation) {
+        var cssClass = "module-resolved";
+        if (symbol.moduleRequest == "notFound")
+          cssClass = "module-not-found";
+        if (symbol.moduleRequest == "parseError")
+          cssClass = "module-parse-error";
+        var range = createRangeFromLocation(symbol.moduleLocation);
+        var marker = editor.markBufferRange(range);
+        var highlight = editor.decorateMarker(marker, {
+          type: 'highlight',
+          class: cssClass
+        });
+        moduleHighlights.push(highlight);
+      }
+    });
+    scope.importedSymbols.map(highlightModule);
+    scope.exportedSymbols.map(highlightModule);
+  }
+}
+function clearModuleHighlights() {
+  moduleHighlights.map((function(highlight) {
+    highlight.getMarker().destroy();
+  }));
+  moduleHighlights = [];
 }
 var currentHighlight = null;
 function highlightScope(scope, editor) {

@@ -26,7 +26,7 @@ function parseBuffer(buffer, path) {
     else
       scopes = escope.analyze(syntaxTree, {ecmaVersion: 5}).scopes;
   } catch (error) {
-    console.error("Error parsing AST/scopes: " + error);
+    console.error("Error parsing AST/scopes: " + error + " in " + path);
     return null;
   }
   scopes.map((function(scope) {
@@ -106,6 +106,7 @@ function decorateExportedSymbols(scope) {
       exportName: null,
       localName: null,
       moduleRequest: null,
+      moduleLocation: null,
       type: "export"
     };
     switch (spec.type) {
@@ -113,6 +114,7 @@ function decorateExportedSymbols(scope) {
         if (node.source) {
           result.importName = spec.id.name;
           result.moduleRequest = node.source.value;
+          result.moduleLocation = node.source.loc;
         } else
           result.localName = spec.id.name;
         result.exportName = spec.name ? spec.name.name : spec.id.name;
@@ -125,6 +127,7 @@ function decorateExportedSymbols(scope) {
         }
         result.importName = "*";
         result.moduleRequest = attemptModuleResolution(scope.path, node.source.value);
+        result.moduleLocation = node.source.loc;
         break;
       default:
         console.error("Unknown export specifier type: " + spec.type);
@@ -162,6 +165,7 @@ function decorateImportedSymbols(scope) {
           {
             var parsedSpec = parseImportSpecifier(specifier, scope);
             if (parsedSpec) {
+              parsedSpec.moduleLocation = node.source.loc;
               parsedSpec.moduleRequest = attemptModuleResolution(scope.path, node.source.value);
               scope.importedSymbols.push(parsedSpec);
             }
