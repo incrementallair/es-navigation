@@ -1,6 +1,6 @@
 '.editor':
-  'ctrl-alt-n': 'ecmascript-navigation:next-symbol'
-  'ctrl-alt-p': 'ecmascript-navigation:previous-symbol'
-  'ctrl-alt-a': 'ecmascript-navigation:select-all-id'
-  'ctrl-alt-d': 'ecmascript-navigation:jump-to-definition'
-  'ctrl-alt-0': 'ecmascript-navigation:jump-to-definition-file'
+  'ctrl-alt-n': 'es-navigation:next-symbol'
+  'ctrl-alt-p': 'es-navigation:previous-symbol'
+  'ctrl-alt-a': 'es-navigation:select-all-id'
+  'ctrl-alt-d': 'es-navigation:jump-to-definition'
+  'ctrl-alt-0': 'es-navigation:jump-to-definition-file'

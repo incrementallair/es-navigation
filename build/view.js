@@ -202,7 +202,7 @@ function clearModuleHighlights(path) {
 var scopeHighlight = null;
 function highlightScope(scope, editor) {
   clearHighlight();
-  if (!atom.config.get("ecmascript-navigation.showScopeHighlights"))
+  if (!atom.config.get("es-navigation.showScopeHighlights"))
     return;
   var location = scope.block.loc;
   var range = createRangeFromLocation(location);

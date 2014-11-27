@@ -20,16 +20,16 @@ var clearModuleHighlights = ($__view__ = require("./view"), $__view__ && $__view
 var clearCache = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).clearCache;
 module.exports = {activate: function(state) {
     atom.packages.once('activated', createStatusBarView);
-    atom.workspaceView.subscribe(atom.config.observe('ecmascript-navigation.es6Support', clearCache));
-    atom.workspaceView.command("ecmascript-navigation:next-symbol", (function() {
+    atom.workspaceView.subscribe(atom.config.observe('es-navigation.es6Support', clearCache));
+    atom.workspaceView.command("es-navigation:next-symbol", (function() {
       toNextIdentifier(1);
     }));
-    atom.workspaceView.command("ecmascript-navigation:previous-symbol", (function() {
+    atom.workspaceView.command("es-navigation:previous-symbol", (function() {
       toNextIdentifier(-1);
     }));
-    atom.workspaceView.command("ecmascript-navigation:select-all-id", selectAllIdentifiers);
-    atom.workspaceView.command("ecmascript-navigation:jump-to-definition-file", toDefinition);
-    atom.workspaceView.command("ecmascript-navigation:jump-to-definition", toInFileDefinition);
+    atom.workspaceView.command("es-navigation:select-all-id", selectAllIdentifiers);
+    atom.workspaceView.command("es-navigation:jump-to-definition-file", toDefinition);
+    atom.workspaceView.command("es-navigation:jump-to-definition", toInFileDefinition);
     atom.workspace.onDidChangeActivePaneItem(clearStatusBar);
     atom.workspace.observeTextEditors((function(editor) {
       editor.onDidChangeCursorPosition((function() {
