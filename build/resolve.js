@@ -15,7 +15,7 @@ var resolve = ($__resolve__ = require("resolve"), $__resolve__ && $__resolve__._
 ;
 function resolveModulePath(basePath, moduleString) {
   try {
-    var failsafeMax = 20;
+    var failsafeMax = 10;
     var basedir = path.dirname(basePath);
     if (path.extname(moduleString) === "")
       moduleString += ".js";
@@ -24,7 +24,7 @@ function resolveModulePath(basePath, moduleString) {
     var splitModule = moduleString.split(path.sep);
     if (splitModule.length == 1 || splitModule[0] == '.') {
       if (splitModule[0] == '.')
-        failsafeMax = 2;
+        failsafeMax = 1;
       basemod = moduleString;
       remmod = "";
     } else {
@@ -32,8 +32,8 @@ function resolveModulePath(basePath, moduleString) {
       remmod = splitModule.splice(1).join(path.sep);
     }
     var failsafe = 0;
-    while (basedir != path.sep && failsafe++ < failsafeMax) {
-      for (var $__3 = ["", "lib/", "src/", "build/"][$traceurRuntime.toProperty(Symbol.iterator)](),
+    while (basedir != path.sep && failsafe++ <= failsafeMax) {
+      for (var $__3 = ["", "lib/", "src/", "build/", "bin/"][$traceurRuntime.toProperty(Symbol.iterator)](),
           $__4; !($__4 = $__3.next()).done; ) {
         var dir = $__4.value;
         {

@@ -71,8 +71,11 @@ function toDefinition() {
     }
     var cursor = editor.getCursorBufferPosition();
     var definition = getDefinitionAtPosition(editor.getText(), editor.getPath(), cursor);
-    if (definition)
+    if (definition) {
       jumpToLocationFrom(definition.loc, definition.path, editor, toDefinitionToggle);
+    } else {
+      toInFileDefinition();
+    }
   }
 }
 var toInFileDefinitionToggle = {};
@@ -196,7 +199,7 @@ function clearModuleHighlights(path) {
     moduleHighlights[path] = [];
   }
 }
-var currentHighlight = null;
+var scopeHighlight = null;
 function highlightScope(scope, editor) {
   clearHighlight();
   if (!atom.config.get("ecmascript-navigation.showScopeHighlights"))
@@ -211,12 +214,12 @@ function highlightScope(scope, editor) {
     type: 'highlight',
     class: 'soft-gray-highlight'
   });
-  currentHighlight = highlight;
+  scopeHighlight = highlight;
 }
 function clearHighlight() {
-  if (currentHighlight) {
-    currentHighlight.getMarker().destroy();
-    currentHighlight = null;
+  if (scopeHighlight) {
+    scopeHighlight.getMarker().destroy();
+    scopeHighlight = null;
   }
 }
 function clearStatusBar() {

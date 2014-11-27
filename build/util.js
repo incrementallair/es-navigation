@@ -101,6 +101,15 @@ function jumpToPositionFrom(position, path, editor) {
   var previousCursor = editor.getCursorBufferPosition();
   var previousPath = editor.getPath();
   if (path == editor.getPath()) {
+    applyJump(editor);
+    highlightImport(editor, {position: editor.getCursorBufferPosition()});
+  } else {
+    atom.workspace.open(path, {
+      activatePane: true,
+      searchAllPanes: true
+    }).then(applyJump);
+  }
+  function applyJump(editor) {
     editor.setCursorBufferPosition(position);
     if (range)
       editor.setSelectedBufferRange(range);
@@ -108,19 +117,5 @@ function jumpToPositionFrom(position, path, editor) {
       toggle.position = previousCursor;
       toggle.path = previousPath;
     }
-    highlightImport(editor, {position: editor.getCursorBufferPosition()});
-  } else {
-    atom.workspace.open(path, {
-      activatePane: true,
-      searchAllPanes: true
-    }).then((function(openedEditor) {
-      openedEditor.setCursorBufferPosition(position);
-      if (range)
-        openedEditor.setSelectedBufferRange(range);
-      if (toggle) {
-        toggle.position = previousCursor;
-        toggle.path = previousPath;
-      }
-    }));
   }
 }

@@ -24,7 +24,10 @@ function findSymbolDefinition(symbol, path) {
       var buffer = fs.readFileSync(path);
       scope = parseBuffer(buffer, path)[0];
     } catch (error) {
-      console.error("Couldn't read file at path: " + path);
+      if (path == "notFound")
+        console.warn(symbol + " was imported from a module that couldn't be resolved.");
+      else
+        console.warn("Couldn't read file at path: " + path);
       return null;
     }
   }
@@ -81,20 +84,20 @@ function findSymbolDefinition(symbol, path) {
                   loc: def.location
                 };
             }
-            console.error("Exported undefined symbol: " + symbol + " in " + path);
+            console.warn("Exported undefined symbol: " + symbol + " in " + path);
             return null;
           }
         }
       }
     }
   }
-  console.error("Unable to resolve " + symbol + " in " + path);
+  console.warn("Unable to resolve " + symbol + " in " + path);
   return null;
   function findInModule(symbol, basePath, moduleRequest) {
     try {
       return findSymbolDefinition(symbol, moduleRequest, null, false);
     } catch (error) {
-      console.error("Couldn't find " + symbol + " in " + moduleRequest);
+      console.warn("Couldn't find " + symbol + " in " + moduleRequest);
       return null;
     }
   }

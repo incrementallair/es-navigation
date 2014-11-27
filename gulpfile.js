@@ -27,6 +27,6 @@ gulp.watch(sources.jscode, ['jscode']);
 gulp.watch(sources.cscode, ['cscode']);
 
 function logError(error) {
-  console.error(error);
+  console.warn(error);
   this.emit('end');
 }

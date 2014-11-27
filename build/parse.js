@@ -20,13 +20,16 @@ var resolver = require(resolverPath ? resolverPath : './resolve');
 function parseBuffer(buffer, path) {
   var scopes;
   try {
-    var syntaxTree = esprima.parse(buffer, {loc: true});
+    var syntaxTree = esprima.parse(buffer, {
+      loc: true,
+      tolerant: true
+    });
     if (atom.config.get("ecmascript-navigation.es6Support"))
       scopes = escope.analyze(syntaxTree, {ecmaVersion: 6}).scopes;
     else
       scopes = escope.analyze(syntaxTree, {ecmaVersion: 5}).scopes;
   } catch (error) {
-    console.error("Error parsing AST/scopes: " + error + " in " + path + "\nPossibly not an ES6 module.");
+    console.warn("Error parsing AST/scopes: " + error + " in " + path + "\nPossibly not an ES6 module.");
     return null;
   }
   scopes.map((function(scope) {
@@ -84,18 +87,21 @@ function decorateExportedSymbols(scope) {
     };
     if (decl.declaration.type == "VariableDeclaration") {
       result.exportName = decl.declaration.declarations[0].id.name;
+      result.location = decl.declaration.declarations[0].id.loc;
       result.localName = result.exportName;
       scope.referencedSymbols.push(decl.declaration.declarations[0].id);
     } else {
       if (decl.declaration.id) {
         result.exportName = decl.declaration.id.name;
+        result.location = decl.declaration.id.loc;
         result.localName = result.exportName;
         scope.referencedSymbols.push(decl.declaration.id);
-      } else
+      } else {
         result.localName = "*default*";
+        result.location = decl.declaration.loc;
+      }
     }
     result.type = "exportDeclaration";
-    result.location = decl.declaration.loc;
     if (decl.default)
       result.exportName = "default";
     return result;
@@ -122,7 +128,7 @@ function decorateExportedSymbols(scope) {
         break;
       case "ExportBatchSpecifier":
         if (!node.source) {
-          console.error("Error: parsing export batch specifier without module source");
+          console.warn("Error: parsing export batch specifier without module source");
           return null;
         }
         result.importName = "*";
@@ -130,7 +136,7 @@ function decorateExportedSymbols(scope) {
         result.moduleLocation = node.source.loc;
         break;
       default:
-        console.error("Unknown export specifier type: " + spec.type);
+        console.warn("Unknown export specifier type: " + spec.type);
     }
     return result;
   }
@@ -209,10 +215,10 @@ function decorateImportedSymbols(scope) {
         scope.referencedSymbols.push(spec.id);
         break;
       default:
-        console.error("Unknown import specifier type: " + spec.type);
+        console.warn("Unknown import specifier type: " + spec.type);
     }
     if (parsedSpec.importName && parsedSpec.localName) {
-      parsedSpec.location = spec.id.loc;
+      parsedSpec.location = spec.name ? spec.name.loc : spec.id.loc;
       return parsedSpec;
     } else
       return null;
