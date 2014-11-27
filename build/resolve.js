@@ -14,38 +14,40 @@ var path = ($__path__ = require("path"), $__path__ && $__path__.__esModule && $_
 var resolve = ($__resolve__ = require("resolve"), $__resolve__ && $__resolve__.__esModule && $__resolve__ || {default: $__resolve__}).default;
 ;
 function resolveModulePath(basePath, moduleString) {
-  try {
-    var failsafeMax = 10;
-    var basedir = path.dirname(basePath);
-    if (path.extname(moduleString) === "")
-      moduleString += ".js";
-    var basemod,
-        remmod;
-    var splitModule = moduleString.split(path.sep);
-    if (splitModule.length == 1 || splitModule[0] == '.') {
-      if (splitModule[0] == '.')
-        failsafeMax = 1;
-      basemod = moduleString;
-      remmod = "";
-    } else {
-      basemod = splitModule[0];
-      remmod = splitModule.splice(1).join(path.sep);
-    }
-    var failsafe = 0;
-    while (basedir != path.sep && failsafe++ <= failsafeMax) {
-      for (var $__3 = ["", "lib/", "src/", "build/", "bin/"][$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__4; !($__4 = $__3.next()).done; ) {
-        var dir = $__4.value;
-        {
-          var attempt = path.join(basedir, basemod, dir, remmod);
-          if (fs.existsSync(attempt))
-            return attempt;
-        }
+  return new Promise((function(resolve, reject) {
+    try {
+      var failsafeMax = 10;
+      var basedir = path.dirname(basePath);
+      if (path.extname(moduleString) === "")
+        moduleString += ".js";
+      var basemod,
+          remmod;
+      var splitModule = moduleString.split(path.sep);
+      if (splitModule.length == 1 || splitModule[0] == '.') {
+        if (splitModule[0] == '.')
+          failsafeMax = 1;
+        basemod = moduleString;
+        remmod = "";
+      } else {
+        basemod = splitModule[0];
+        remmod = splitModule.splice(1).join(path.sep);
       }
-      basedir = path.join(basedir, "..");
+      var failsafe = 0;
+      while (basedir != path.sep && failsafe++ <= failsafeMax) {
+        for (var $__3 = ["", "lib/", "src/", "build/", "bin/"][$traceurRuntime.toProperty(Symbol.iterator)](),
+            $__4; !($__4 = $__3.next()).done; ) {
+          var dir = $__4.value;
+          {
+            var attempt = path.join(basedir, basemod, dir, remmod);
+            if (fs.existsSync(attempt))
+              return resolve(attempt);
+          }
+        }
+        basedir = path.join(basedir, "..");
+      }
+    } catch (error) {
+      return reject(error);
     }
-  } catch (error) {
-    throw error;
-  }
-  throw new Error("Couldn't resolve " + moduleString);
+    return reject(Error("Couldn't resolve " + moduleString));
+  }));
 }

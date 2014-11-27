@@ -171,23 +171,28 @@ function decorateImportedSymbols(scope) {
             localName: "*emptyImport*",
             location: null,
             moduleLocation: null,
-            moduleRequest: null,
+            moduleRequest: "notFound",
             importLocation: node.loc,
             type: "import"
           });
         }
-        for (var $__4 = node.specifiers[$traceurRuntime.toProperty(Symbol.iterator)](),
-            $__5; !($__5 = $__4.next()).done; ) {
+        var $__12 = function() {
           var specifier = $__5.value;
           {
             var parsedSpec = parseImportSpecifier(specifier, scope);
             if (parsedSpec) {
               parsedSpec.importLocation = node.loc;
               parsedSpec.moduleLocation = node.source.loc;
-              parsedSpec.moduleRequest = attemptModuleResolution(scope.path, node.source.value);
+              attemptModuleResolution(scope.path, node.source.value).then((function(resolvedPath) {
+                parsedSpec.moduleRequest = resolvedPath;
+              }));
               scope.importedSymbols.push(parsedSpec);
             }
           }
+        };
+        for (var $__4 = node.specifiers[$traceurRuntime.toProperty(Symbol.iterator)](),
+            $__5; !($__5 = $__4.next()).done; ) {
+          $__12();
         }
       }
     })});
@@ -196,6 +201,7 @@ function decorateImportedSymbols(scope) {
       importName: null,
       localName: null,
       location: null,
+      moduleRequest: "notFound",
       type: "import"
     };
     switch (spec.type) {
@@ -236,8 +242,8 @@ function decorateReferencedSymbols(scope) {
     {
       for (var $__6 = variable.references[$traceurRuntime.toProperty(Symbol.iterator)](),
           $__7; !($__7 = $__6.next()).done; ) {
-        var reference$__12 = $__7.value;
-        scope.referencedSymbols.push(reference$__12.identifier);
+        var reference$__13 = $__7.value;
+        scope.referencedSymbols.push(reference$__13.identifier);
       }
       for (var $__8 = variable.identifiers[$traceurRuntime.toProperty(Symbol.iterator)](),
           $__9; !($__9 = $__8.next()).done; ) {
@@ -257,9 +263,7 @@ function decorateReferencedSymbols(scope) {
     })});
 }
 function attemptModuleResolution(basePath, moduleString) {
-  try {
-    return resolver.resolveModulePath(basePath, moduleString);
-  } catch (error) {
-    return "notFound";
-  }
+  return new Promise((function(resolve, reject) {
+    resolver.resolveModulePath(basePath, moduleString).then(resolve, reject);
+  }));
 }

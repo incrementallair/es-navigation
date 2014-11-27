@@ -1,10 +1,9 @@
 # Atom ES6 Navigation
 
-An [Atom](https://atom.io) package providing simple scope-sensitive Javascript navigation utilities. [ES6](https://people.mozilla.org/~jorendorff/es6-draft.html) block scopes.
+An [Atom](https://atom.io) package providing simple scope-sensitive Javascript navigation utilities. Has support for navigating across [ES6](https://people.mozilla.org/~jorendorff/es6-draft.html) module boundaries.
 
 ## Installation
 To install directly, clone the repository and `cd` into the base directory. From here, simply run `apm install` followed by `apm link`.
-
 
 ## Features
 
@@ -24,4 +23,14 @@ By default, a heuristic resolver is used to find module paths. This can be chang
 * `file` : The path to the file importing the module.
 * `module` : The module string, e.g. `./foo`.
 
-Currently only synchronous module resolvers are supported.
+`resolveModulePath` must return an ES6 Promise object that passes the resolved module path to the callback function, for example:
+``` javascript
+resolveModulePath(file, module) {
+  return new Promise((resolve, reject) => {
+    ...
+    resolve(resolvedModulePath);
+      or
+    reject(error);
+  });
+}
+```
