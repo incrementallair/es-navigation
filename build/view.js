@@ -30,6 +30,9 @@ Object.defineProperties(exports, {
   createStatusBarView: {get: function() {
       return createStatusBarView;
     }},
+  updateStatusBar: {get: function() {
+      return updateStatusBar;
+    }},
   __esModule: {value: true}
 });
 var $__status_45_bar__,
@@ -91,6 +94,8 @@ function toInFileDefinition() {
     var location = getInFileDefinitionAtPosition(editor.getText(), editor.getPath(), cursor);
     if (location)
       jumpToLocationFrom(location, editor.getPath(), editor, toInFileDefinitionToggle);
+    else
+      updateStatusBar("ESNav: couldn't find definition.");
   }
 }
 function selectAllIdentifiers() {
@@ -110,10 +115,11 @@ function selectAllIdentifiers() {
           editor.addSelectionForBufferRange(range);
         }
       }
-      ourStatusBar.updateText(references.length + " matches");
+      updateStatusBar(references.length + " matches");
       highlightScope(scope, editor);
       highlightImport(editor, {symbol: id});
-    }
+    } else
+      updateStatusBar("ESNav: couldn't find symbol.");
   }
 }
 function toNextIdentifier() {
@@ -135,7 +141,8 @@ function toNextIdentifier() {
         position: editor.getCursorBufferPosition()
       });
       highlightScope(scope, editor);
-    }
+    } else
+      updateStatusBar("ESNav: couldn't find symbol.");
   }
 }
 var ourStatusBar = null;
@@ -222,8 +229,12 @@ function clearHighlight() {
     scopeHighlight = null;
   }
 }
+function updateStatusBar(text) {
+  if (ourStatusBar)
+    ourStatusBar.updateText(text);
+}
 function clearStatusBar() {
-  ourStatusBar.updateText('');
+  updateStatusBar('');
 }
 function clearToggles() {
   toInFileDefinitionToggle.position = null;

@@ -37,6 +37,7 @@ function getDefinitionAtPosition(buffer, path, position) {
     else
       return findSymbolDefinition(id.name, path, null, true, scope);
   }
+  return null;
 }
 function getInFileDefinitionAtPosition(buffer, path, position) {
   var $__5 = getReferencesAtPosition(buffer, path, position, {

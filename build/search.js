@@ -19,15 +19,22 @@ function findSymbolDefinition(symbol, path) {
   var namespace = arguments[2] !== (void 0) ? arguments[2] : null;
   var isRoot = arguments[3] !== (void 0) ? arguments[3] : true;
   var scope = arguments[4] !== (void 0) ? arguments[4] : null;
+  if (path == "notFound") {
+    console.warn("Symbol \"" + symbol + "\" was imported from a module that couldn't be resolved.");
+    return null;
+  }
   if (!scope) {
+    var buffer;
     try {
-      var buffer = fs.readFileSync(path);
-      scope = parseBuffer(buffer, path)[0];
+      buffer = fs.readFileSync(path);
     } catch (error) {
-      if (path == "notFound")
-        console.warn(symbol + " was imported from a module that couldn't be resolved.");
-      else
-        console.warn("Couldn't read file at path: " + path);
+      console.warn("Couldn't read module at path: " + path);
+      return null;
+    }
+    try {
+      scope = parseBuffer(buffer, path)[0];
+    } catch (variable) {
+      console.warn("Couldn't parse module at path: " + path);
       return null;
     }
   }
@@ -84,20 +91,20 @@ function findSymbolDefinition(symbol, path) {
                   loc: def.location
                 };
             }
-            console.warn("Exported undefined symbol: " + symbol + " in " + path);
+            console.warn("Exported undefined symbol: " + symbol + " in module " + path);
             return null;
           }
         }
       }
     }
   }
-  console.warn("Unable to resolve " + symbol + " in " + path);
+  console.warn("Unable to find definition of " + symbol + " in module " + path);
   return null;
   function findInModule(symbol, basePath, moduleRequest) {
     try {
       return findSymbolDefinition(symbol, moduleRequest, null, false);
     } catch (error) {
-      console.warn("Couldn't find " + symbol + " in " + moduleRequest);
+      console.warn("Unable to find definition of " + symbol + " in module " + moduleRequest);
       return null;
     }
   }
