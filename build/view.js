@@ -81,7 +81,7 @@ function toDefinition() {
           clearModuleHighlights();
           highlightImport(editor, {position: editor.getCursorBufferPosition()});
           if (["unresolved", "notFound", "parseError"].indexOf(symbol.moduleRequest) == -1)
-            jumpToPositionFrom([0, 0], symbol.moduleRequest, editor, {state: 1});
+            return jumpToPositionFrom([0, 0], symbol.moduleRequest, editor, {state: 1});
         }
       }
     }
@@ -273,7 +273,6 @@ function jumpToPositionFrom(position, path, editor, params) {
   var previousPath = editor.getPath();
   if (path == editor.getPath()) {
     applyJump(editor);
-    highlightImport(editor, {position: editor.getCursorBufferPosition()});
   } else {
     atom.workspace.open(path, {
       activatePane: true,
@@ -293,5 +292,6 @@ function jumpToPositionFrom(position, path, editor, params) {
     }
     if (params.state)
       definitionState = params.state;
+    highlightImport(editor, {position: editor.getCursorBufferPosition()});
   }
 }
