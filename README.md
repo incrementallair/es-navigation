@@ -6,10 +6,10 @@ When writing modules with ES6 module syntax, it can often be frustrating jumping
 
 ## Features
 By default the following keybindings are provided:
+* <kbd>Ctrl-Alt-D</kbd> : Cycle symbol definition. Jumps between the current position and its definition. The definition can within the same file or an ES6 import binding to another file.
 * <kbd>Ctrl-Alt-N</kbd> : Jump to next match of symbol.
 * <kbd>Ctrl-Alt-P</kbd> : Jump to previous match of symbol.
 * <kbd>Ctrl-Alt-A</kbd> : Multi-select all matches of symbol. Useful for bulk-renaming variables or ES6 exports.
-* <kbd>Ctrl-Alt-D</kbd> : Cycle symbol definition. Jumps between the current position and its definition. The definition can within the same file or an ES6 import binding to another file.
 
 Matching is scope-sensitive - two variables defined in different scopes but sharing a name are not matched, for instance.
 
