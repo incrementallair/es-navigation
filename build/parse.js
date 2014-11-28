@@ -267,7 +267,7 @@ function attemptModuleResolution(basePath, moduleString, spec) {
       spec.moduleRequest = resolved;
       resolve(resolved);
     }), (function(rejected) {
-      resolve(rejected);
+      resolve("notFound");
     }));
   }));
 }

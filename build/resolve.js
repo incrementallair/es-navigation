@@ -18,8 +18,9 @@ function resolveModulePath(basePath, moduleString) {
     try {
       var failsafeMax = 10;
       var basedir = path.dirname(basePath);
-      if (path.extname(moduleString) === "")
-        moduleString += ".js";
+      var baseext = path.extname(basePath);
+      if (path.extname(moduleString) != baseext)
+        moduleString += baseext;
       var basemod,
           remmod;
       var splitModule = moduleString.split(path.sep);
@@ -34,11 +35,19 @@ function resolveModulePath(basePath, moduleString) {
       }
       var failsafe = 0;
       while (basedir != path.sep && failsafe++ <= failsafeMax) {
-        for (var $__3 = ["", "lib/", "src/", "build/", "bin/"][$traceurRuntime.toProperty(Symbol.iterator)](),
+        var libs = [""],
+            packageJson = {};
+        var packagePath = path.join(basedir, basemod, "package.json");
+        if (fs.existsSync(packagePath))
+          packageJson = JSON.parse(fs.readFileSync(packagePath));
+        if (packageJson.directories)
+          if (packageJson.directories.lib)
+            libs.push(packageJson.directories.lib);
+        for (var $__3 = libs[$traceurRuntime.toProperty(Symbol.iterator)](),
             $__4; !($__4 = $__3.next()).done; ) {
-          var dir = $__4.value;
+          var lib = $__4.value;
           {
-            var attempt = path.join(basedir, basemod, dir, remmod);
+            var attempt = path.join(basedir, basemod, lib, remmod);
             if (fs.existsSync(attempt))
               return resolve(attempt);
           }
@@ -46,8 +55,8 @@ function resolveModulePath(basePath, moduleString) {
         basedir = path.join(basedir, "..");
       }
     } catch (error) {
-      return reject("notFound");
+      return reject(error);
     }
-    return reject("notFound");
+    return reject(moduleString + " not found from " + basePath + ".");
   }));
 }
