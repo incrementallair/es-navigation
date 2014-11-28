@@ -30,15 +30,15 @@ function getDefinitionAtPosition(buffer, path, position) {
     relativePosition: null,
     globalScope: null
   };
-  var $__5 = getReferencesAtPosition(buffer, path, position, {
+  var $__7 = getReferencesAtPosition(buffer, path, position, {
     includeImports: true,
     relativePosition: true
   }),
-      id = $__5.id,
-      scope = $__5.scope,
-      globalScope = $__5.globalScope,
-      imports = $__5.imports,
-      relativePosition = $__5.relativePosition;
+      id = $__7.id,
+      scope = $__7.scope,
+      globalScope = $__7.globalScope,
+      imports = $__7.imports,
+      relativePosition = $__7.relativePosition;
   result.globalScope = globalScope;
   if (id && scope) {
     result.relativePosition = relativePosition;
@@ -54,6 +54,16 @@ function getDefinitionAtPosition(buffer, path, position) {
       result.definition = findSymbolDefinition(id.property, path, id.object, true, scope);
     else
       result.definition = findSymbolDefinition(id.name, path, null, true, scope);
+  } else {
+    for (var $__5 = globalScope.exportedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+        $__6; !($__6 = $__5.next()).done; ) {
+      var symbol$__8 = $__6.value;
+      {
+        if (positionIsInsideLocation(position, symbol$__8.location))
+          if (symbol$__8.moduleRequest)
+            result.definition = findSymbolDefinition(symbol$__8.importName, symbol$__8.moduleRequest, null, true, scope);
+      }
+    }
   }
   return result;
 }

@@ -66,36 +66,43 @@ function toDefinition() {
         path: editor.getPath(),
         pos: cursor
       }];
-    if (def.import && definitionState === 0) {
-      var position = [def.import.location.start.line - 1, def.import.location.start.column + def.relativePosition];
-      return jumpToLocationFrom(def.import.location, editor.getPath(), editor, {
-        state: 1,
-        position: position
-      });
-    }
-    if (def.definition && definitionState < 2) {
-      var position$__10 = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
-      return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
-        state: 2,
-        position: position$__10
-      });
-    }
-    if (definitionState > 0) {
-      jumpToPositionFrom(definitionStack[0].pos, definitionStack[0].path, editor, {state: 0});
-      clearDefinitionStack();
-      return;
-    }
     for (var $__7 = def.globalScope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
         $__8; !($__8 = $__7.next()).done; ) {
       var symbol = $__8.value;
       {
         if (positionIsInsideLocation(cursor, symbol.importLocation)) {
+          if (def.definition) {
+            var position = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
+            return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
+              state: 2,
+              position: position
+            });
+          }
           clearModuleHighlights();
           highlightImport(editor, {position: editor.getCursorBufferPosition()});
           if (["unresolved", "notFound", "parseError"].indexOf(symbol.moduleRequest) == -1)
             jumpToPositionFrom([0, 0], symbol.moduleRequest, editor, {state: 1});
         }
       }
+    }
+    if (def.import && definitionState === 0) {
+      var position$__10 = [def.import.location.start.line - 1, def.import.location.start.column + def.relativePosition];
+      return jumpToLocationFrom(def.import.location, editor.getPath(), editor, {
+        state: 1,
+        position: position$__10
+      });
+    }
+    if (def.definition && definitionState < 2) {
+      var position$__11 = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
+      return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
+        state: 2,
+        position: position$__11
+      });
+    }
+    if (definitionState > 0) {
+      jumpToPositionFrom(definitionStack[0].pos, definitionStack[0].path, editor, {state: 0});
+      clearDefinitionStack();
+      return;
     }
   }
 }

@@ -17,7 +17,6 @@ function findSymbolDefinition(symbol, path) {
   var namespace = arguments[2] !== (void 0) ? arguments[2] : null;
   var isRoot = arguments[3] !== (void 0) ? arguments[3] : true;
   var scope = arguments[4] !== (void 0) ? arguments[4] : null;
-  console.log("Trying to find " + symbol + " in path " + path);
   if (path == "unresolved")
     return null;
   if (path == "notFound") {
