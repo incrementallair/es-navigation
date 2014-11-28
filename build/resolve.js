@@ -40,9 +40,12 @@ function resolveModulePath(basePath, moduleString) {
         var packagePath = path.join(basedir, basemod, "package.json");
         if (fs.existsSync(packagePath))
           packageJson = JSON.parse(fs.readFileSync(packagePath));
-        if (packageJson.directories)
+        if (packageJson.directories) {
+          if (packageJson.directories.dist)
+            libs.push(packageJson.directories.dist);
           if (packageJson.directories.lib)
             libs.push(packageJson.directories.lib);
+        }
         for (var $__3 = libs[$traceurRuntime.toProperty(Symbol.iterator)](),
             $__4; !($__4 = $__3.next()).done; ) {
           var lib = $__4.value;

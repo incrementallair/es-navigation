@@ -26,18 +26,29 @@ var findSymbolDefinition = ($__search__ = require("./search"), $__search__ && $_
 function getDefinitionAtPosition(buffer, path, position) {
   var result = {
     import: null,
-    definition: null
+    definition: null,
+    relativePosition: null,
+    globalScope: null
   };
-  var $__5 = getReferencesAtPosition(buffer, path, position, {includeImports: true}),
+  var $__5 = getReferencesAtPosition(buffer, path, position, {
+    includeImports: true,
+    relativePosition: true
+  }),
       id = $__5.id,
       scope = $__5.scope,
-      imports = $__5.imports;
+      globalScope = $__5.globalScope,
+      imports = $__5.imports,
+      relativePosition = $__5.relativePosition;
+  result.globalScope = globalScope;
   if (id && scope) {
+    result.relativePosition = relativePosition;
     for (var $__3 = imports[$traceurRuntime.toProperty(Symbol.iterator)](),
         $__4; !($__4 = $__3.next()).done; ) {
       var symbol = $__4.value;
-      if (symbol.localName == id.name)
-        result.import = symbol;
+      {
+        if (symbol.localName == id.name)
+          result.import = symbol;
+      }
     }
     if (id.property && id.object)
       result.definition = findSymbolDefinition(id.property, path, id.object, true, scope);
@@ -57,6 +68,7 @@ function getReferencesAtPosition(buffer, path, position) {
         var references = getReferencesAtPositionInScope(scope, position, params);
         if (references.id && references.references) {
           references.scope = scope;
+          references.globalScope = scopes[0];
           return references;
         }
       }
@@ -67,7 +79,8 @@ function getReferencesAtPosition(buffer, path, position) {
     references: null,
     scope: null,
     relativePosition: null,
-    imports: null
+    imports: null,
+    globalScope: scopes[0]
   };
 }
 function getReferencesAtPositionInScope(scope, position) {

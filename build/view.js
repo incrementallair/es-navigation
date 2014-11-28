@@ -66,12 +66,34 @@ function toDefinition() {
         path: editor.getPath(),
         pos: cursor
       }];
-    if (def.import && definitionState === 0)
-      return jumpToLocationFrom(def.import.location, editor.getPath(), editor, {state: 1});
-    if (def.definition && definitionState < 2)
-      return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {state: 2});
-    jumpToPositionFrom(definitionStack[0].pos, definitionStack[0].path, editor, {state: 0});
-    clearDefinitionStack();
+    if (def.import && definitionState === 0) {
+      var position = [def.import.location.start.line - 1, def.import.location.start.column + def.relativePosition];
+      return jumpToLocationFrom(def.import.location, editor.getPath(), editor, {
+        state: 1,
+        position: position
+      });
+    }
+    if (def.definition && definitionState < 2) {
+      var position$__10 = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
+      return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
+        state: 2,
+        position: position$__10
+      });
+    }
+    if (definitionState > 0) {
+      jumpToPositionFrom(definitionStack[0].pos, definitionStack[0].path, editor, {state: 0});
+      clearDefinitionStack();
+      return;
+    }
+    for (var $__7 = def.globalScope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+        $__8; !($__8 = $__7.next()).done; ) {
+      var symbol = $__8.value;
+      {
+        if (positionIsInsideLocation(cursor, symbol.importLocation))
+          if (["unresolved", "notFound", "parseError"].indexOf(symbol.moduleRequest) == -1)
+            jumpToPositionFrom([0, 0], symbol.moduleRequest, editor, {state: 1});
+      }
+    }
   }
 }
 function clearDefinitionStack() {
@@ -95,8 +117,10 @@ function selectAllIdentifiers() {
         }
       }
       updateStatusBar(references.length + " matches");
-      highlightScope(scope, editor);
+      clearHighlight();
       highlightImport(editor, {symbol: id});
+      if (scope.type != "global")
+        highlightScope(scope, editor);
     } else
       updateStatusBar("ESNav: couldn't find symbol.");
   }
@@ -113,14 +137,11 @@ function toNextIdentifier() {
         relativePosition = $__9.relativePosition;
     if (id && references) {
       var next = getNextReference(id, references, skip);
-      var nextPosition = [next.loc.start.line - 1, next.loc.start.column + relativePosition];
-      editor.setCursorBufferPosition(nextPosition);
-      highlightImport(editor, {
-        symbol: id,
-        position: editor.getCursorBufferPosition()
-      });
+      var position = [next.loc.start.line - 1, next.loc.start.column + relativePosition];
+      jumpToLocationFrom(next.loc, editor.getPath(), editor, {position: position});
       ourStatusBar.updateText((references.indexOf(id) + 1) + "/" + references.length + " matches");
-      highlightScope(scope, editor);
+      if (scope.type != "global")
+        highlightScope(scope, editor);
     } else
       updateStatusBar("ESNav: couldn't find symbol.");
   }
@@ -194,9 +215,9 @@ function clearModuleHighlights(path) {
     moduleHighlights[path] = [];
   }
 }
-var scopeHighlight = null;
+var scopeHighlight = null,
+    navHighlight = null;
 function highlightScope(scope, editor) {
-  clearHighlight();
   if (!atom.config.get("es-navigation.showScopeHighlights"))
     return;
   var location = scope.block.loc;
@@ -216,6 +237,10 @@ function clearHighlight() {
     scopeHighlight.getMarker().destroy();
     scopeHighlight = null;
   }
+  if (navHighlight) {
+    navHighlight.getMarker().destroy();
+    navHighlight = null;
+  }
 }
 function updateStatusBar(text) {
   if (ourStatusBar)
@@ -226,8 +251,8 @@ function clearStatusBar() {
 }
 function jumpToLocationFrom(location, path, editor, params) {
   var range = createRangeFromLocation(location);
-  var position = [location.start.line - 1, location.start.column];
-  jumpToPositionFrom(position, path, editor, params, range);
+  var position = [range[0][0], range[0][1]];
+  jumpToPositionFrom(params.position ? params.position : position, path, editor, params, range);
 }
 function jumpToPositionFrom(position, path, editor, params) {
   var range = arguments[4] !== (void 0) ? arguments[4] : null;
@@ -244,8 +269,15 @@ function jumpToPositionFrom(position, path, editor, params) {
   }
   function applyJump(editor) {
     editor.setCursorBufferPosition(position);
-    if (range)
-      editor.setSelectedBufferRange(range);
+    if (range) {
+      clearHighlight();
+      var marker = editor.markBufferRange(range);
+      var highlight = editor.decorateMarker(marker, {
+        type: 'highlight',
+        class: 'navigation-select'
+      });
+      navHighlight = highlight;
+    }
     if (params.state)
       definitionState = params.state;
   }
