@@ -80,16 +80,18 @@ function findSymbolDefinition(symbol, path) {
               loc: sym$__12.location
             };
           if (sym$__12.moduleRequest) {
-            return findInModule(symbol, path, sym$__12.moduleRequest);
+            return findInModule(sym$__12.localName, path, sym$__12.moduleRequest);
           } else {
             for (var $__7 = scope.definedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
                 $__8; !($__8 = $__7.next()).done; ) {
               var def = $__8.value;
-              if (def.localName == symbol)
-                return {
-                  path: path,
-                  loc: def.location
-                };
+              {
+                if (def.localName == sym$__12.localName)
+                  return {
+                    path: path,
+                    loc: def.location
+                  };
+              }
             }
             console.warn("Exported undefined symbol: " + symbol + " in module " + path);
             return null;

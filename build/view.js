@@ -89,9 +89,12 @@ function toDefinition() {
         $__8; !($__8 = $__7.next()).done; ) {
       var symbol = $__8.value;
       {
-        if (positionIsInsideLocation(cursor, symbol.importLocation))
+        if (positionIsInsideLocation(cursor, symbol.importLocation)) {
+          clearModuleHighlights();
+          highlightImport(editor, {position: editor.getCursorBufferPosition()});
           if (["unresolved", "notFound", "parseError"].indexOf(symbol.moduleRequest) == -1)
             jumpToPositionFrom([0, 0], symbol.moduleRequest, editor, {state: 1});
+        }
       }
     }
   }
