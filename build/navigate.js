@@ -3,14 +3,11 @@ Object.defineProperties(exports, {
   getReferencesAtPosition: {get: function() {
       return getReferencesAtPosition;
     }},
-  getInFileDefinitionAtPosition: {get: function() {
-      return getInFileDefinitionAtPosition;
+  getNextReference: {get: function() {
+      return getNextReference;
     }},
   getDefinitionAtPosition: {get: function() {
       return getDefinitionAtPosition;
-    }},
-  getNextReference: {get: function() {
-      return getNextReference;
     }},
   __esModule: {value: true}
 });
@@ -26,34 +23,28 @@ var findSymbolDefinition = ($__search__ = require("./search"), $__search__ && $_
 ;
 ;
 ;
-;
 function getDefinitionAtPosition(buffer, path, position) {
-  var $__5 = getReferencesAtPosition(buffer, path, position),
+  var result = {
+    import: null,
+    definition: null
+  };
+  var $__5 = getReferencesAtPosition(buffer, path, position, {includeImports: true}),
       id = $__5.id,
-      scope = $__5.scope;
+      scope = $__5.scope,
+      imports = $__5.imports;
   if (id && scope) {
+    for (var $__3 = imports[$traceurRuntime.toProperty(Symbol.iterator)](),
+        $__4; !($__4 = $__3.next()).done; ) {
+      var symbol = $__4.value;
+      if (symbol.localName == id.name)
+        result.import = symbol;
+    }
     if (id.property && id.object)
-      return findSymbolDefinition(id.property, path, id.object, true, scope);
+      result.definition = findSymbolDefinition(id.property, path, id.object, true, scope);
     else
-      return findSymbolDefinition(id.name, path, null, true, scope);
+      result.definition = findSymbolDefinition(id.name, path, null, true, scope);
   }
-  return null;
-}
-function getInFileDefinitionAtPosition(buffer, path, position) {
-  var $__5 = getReferencesAtPosition(buffer, path, position, {
-    includeImports: true,
-    includeDefinitions: true
-  }),
-      id = $__5.id,
-      imports = $__5.imports,
-      definitions = $__5.definitions;
-  if (id) {
-    if (definitions.length > 0)
-      return definitions[0].location;
-    if (imports.length > 0)
-      return imports[0].location;
-  }
-  return null;
+  return result;
 }
 function getReferencesAtPosition(buffer, path, position) {
   var params = arguments[3] !== (void 0) ? arguments[3] : {};

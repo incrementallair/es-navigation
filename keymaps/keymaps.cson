@@ -3,4 +3,3 @@
   'ctrl-alt-p': 'es-navigation:previous-symbol'
   'ctrl-alt-a': 'es-navigation:select-all-id'
   'ctrl-alt-d': 'es-navigation:jump-to-definition'
-  'ctrl-alt-0': 'es-navigation:jump-to-definition-file'

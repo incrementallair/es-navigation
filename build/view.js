@@ -9,17 +9,14 @@ Object.defineProperties(exports, {
   toDefinition: {get: function() {
       return toDefinition;
     }},
-  toInFileDefinition: {get: function() {
-      return toInFileDefinition;
-    }},
   clearHighlight: {get: function() {
       return clearHighlight;
     }},
   clearStatusBar: {get: function() {
       return clearStatusBar;
     }},
-  clearToggles: {get: function() {
-      return clearToggles;
+  clearDefinitionStack: {get: function() {
+      return clearDefinitionStack;
     }},
   clearModuleHighlights: {get: function() {
       return clearModuleHighlights;
@@ -39,7 +36,6 @@ var $__status_45_bar__,
     $__cache__,
     $__util__,
     $__util__,
-    $__util__,
     $__navigate__,
     $__navigate__,
     $__navigate__,
@@ -50,9 +46,6 @@ var parseBuffer = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__e
 var $__2 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
     getActiveEditor = $__2.getActiveEditor,
     createRangeFromLocation = $__2.createRangeFromLocation;
-var $__3 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
-    jumpToPositionFrom = $__3.jumpToPositionFrom,
-    jumpToLocationFrom = $__3.jumpToLocationFrom;
 var positionIsInsideLocation = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}).positionIsInsideLocation;
 var getReferencesAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getReferencesAtPosition;
 var getNextReference = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getNextReference;
@@ -63,53 +56,41 @@ var getInFileDefinitionAtPosition = ($__navigate__ = require("./navigate"), $__n
 ;
 ;
 ;
-var toDefinitionToggle = {};
+var definitionStack = [],
+    definitionState = 0;
 function toDefinition() {
   var editor = getActiveEditor();
   if (editor) {
-    if (toDefinitionToggle.position && toDefinitionToggle.path) {
-      jumpToPositionFrom(toDefinitionToggle.position, toDefinitionToggle.path, editor);
-      toDefinitionToggle.position = null;
-      return;
-    }
     var cursor = editor.getCursorBufferPosition();
-    var definition = getDefinitionAtPosition(editor.getText(), editor.getPath(), cursor);
-    if (definition) {
-      jumpToLocationFrom(definition.loc, definition.path, editor, toDefinitionToggle);
-    } else {
-      toInFileDefinition();
-    }
+    var def = getDefinitionAtPosition(editor.getText(), editor.getPath(), cursor);
+    if (definitionState === 0)
+      definitionStack = [{
+        path: editor.getPath(),
+        pos: cursor
+      }];
+    if (def.import && definitionState === 0)
+      return jumpToLocationFrom(def.import.location, editor.getPath(), editor, {state: 1});
+    if (def.definition && definitionState < 2)
+      return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {state: 2});
+    jumpToPositionFrom(definitionStack[0].pos, definitionStack[0].path, editor, {state: 0});
+    clearDefinitionStack();
   }
 }
-var toInFileDefinitionToggle = {};
-function toInFileDefinition() {
-  var editor = getActiveEditor();
-  if (editor) {
-    if (toInFileDefinitionToggle.position && toInFileDefinitionToggle.path) {
-      jumpToPositionFrom(toInFileDefinitionToggle.position, toInFileDefinitionToggle.path, editor);
-      toInFileDefinitionToggle.position = null;
-      return;
-    }
-    var cursor = editor.getCursorBufferPosition();
-    var location = getInFileDefinitionAtPosition(editor.getText(), editor.getPath(), cursor);
-    if (location)
-      jumpToLocationFrom(location, editor.getPath(), editor, toInFileDefinitionToggle);
-    else
-      updateStatusBar("ESNav: couldn't find definition.");
-  }
+function clearDefinitionStack() {
+  definitionState = 0;
 }
 function selectAllIdentifiers() {
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
-    var $__11 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
-        id = $__11.id,
-        references = $__11.references,
-        scope = $__11.scope;
+    var $__10 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
+        id = $__10.id,
+        references = $__10.references,
+        scope = $__10.scope;
     if (references && id) {
-      for (var $__9 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__10; !($__10 = $__9.next()).done; ) {
-        var reference = $__10.value;
+      for (var $__8 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
+          $__9; !($__9 = $__8.next()).done; ) {
+        var reference = $__9.value;
         {
           var range = createRangeFromLocation(reference.loc);
           editor.addSelectionForBufferRange(range);
@@ -127,11 +108,11 @@ function toNextIdentifier() {
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
-    var $__11 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}),
-        id = $__11.id,
-        references = $__11.references,
-        scope = $__11.scope,
-        relativePosition = $__11.relativePosition;
+    var $__10 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}),
+        id = $__10.id,
+        references = $__10.references,
+        scope = $__10.scope,
+        relativePosition = $__10.relativePosition;
     if (id && references) {
       var next = getNextReference(id, references, skip);
       var nextPosition = [next.loc.start.line - 1, next.loc.start.column + relativePosition];
@@ -140,6 +121,7 @@ function toNextIdentifier() {
         symbol: id,
         position: editor.getCursorBufferPosition()
       });
+      ourStatusBar.updateText((references.indexOf(id) + 1) + "/" + references.length + " matches");
       highlightScope(scope, editor);
     } else
       updateStatusBar("ESNav: couldn't find symbol.");
@@ -159,9 +141,9 @@ function highlightImport(editor, params) {
   if (!scopes)
     return;
   var scope = scopes[0];
-  for (var $__9 = scope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
-      $__10; !($__10 = $__9.next()).done; ) {
-    var symbol = $__10.value;
+  for (var $__8 = scope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+      $__9; !($__9 = $__8.next()).done; ) {
+    var symbol = $__9.value;
     {
       var match = false;
       if (params.symbol && symbol.localName == params.symbol.name)
@@ -198,9 +180,9 @@ function highlightModuleSymbol(editor, symbol) {
 }
 function clearModuleHighlights(path) {
   if (moduleHighlights.has(path)) {
-    for (var $__9 = moduleHighlights.get(path)[$traceurRuntime.toProperty(Symbol.iterator)](),
-        $__10; !($__10 = $__9.next()).done; ) {
-      var highlight = $__10.value;
+    for (var $__8 = moduleHighlights.get(path)[$traceurRuntime.toProperty(Symbol.iterator)](),
+        $__9; !($__9 = $__8.next()).done; ) {
+      var highlight = $__9.value;
       highlight.getMarker().destroy();
     }
     moduleHighlights[path] = [];
@@ -236,7 +218,29 @@ function updateStatusBar(text) {
 function clearStatusBar() {
   updateStatusBar('');
 }
-function clearToggles() {
-  toInFileDefinitionToggle.position = null;
-  toDefinitionToggle.position = null;
+function jumpToLocationFrom(location, path, editor, params) {
+  var range = createRangeFromLocation(location);
+  var position = [location.start.line - 1, location.start.column];
+  jumpToPositionFrom(position, path, editor, params, range);
+}
+function jumpToPositionFrom(position, path, editor, params) {
+  var range = arguments[4] !== (void 0) ? arguments[4] : null;
+  var previousCursor = editor.getCursorBufferPosition();
+  var previousPath = editor.getPath();
+  if (path == editor.getPath()) {
+    applyJump(editor);
+    highlightImport(editor, {position: editor.getCursorBufferPosition()});
+  } else {
+    atom.workspace.open(path, {
+      activatePane: true,
+      searchAllPanes: true
+    }).then(applyJump);
+  }
+  function applyJump(editor) {
+    editor.setCursorBufferPosition(position);
+    if (range)
+      editor.setSelectedBufferRange(range);
+    if (params.state)
+      definitionState = params.state;
+  }
 }
