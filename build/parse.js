@@ -112,6 +112,7 @@ function decorateExportedSymbols(scope) {
       exportName: null,
       localName: null,
       moduleRequest: null,
+      moduleRequestCallback: null,
       moduleLocation: null,
       type: "export"
     };
@@ -132,7 +133,7 @@ function decorateExportedSymbols(scope) {
           return null;
         }
         result.importName = "*";
-        result.moduleRequest = attemptModuleResolution(scope.path, node.source.value);
+        result.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, result);
         result.moduleLocation = node.source.loc;
         break;
       default:
@@ -172,27 +173,23 @@ function decorateImportedSymbols(scope) {
             location: null,
             moduleLocation: null,
             moduleRequest: "notFound",
+            moduleRequestCallback: null,
             importLocation: node.loc,
             type: "import"
           });
         }
-        var $__12 = function() {
+        for (var $__4 = node.specifiers[$traceurRuntime.toProperty(Symbol.iterator)](),
+            $__5; !($__5 = $__4.next()).done; ) {
           var specifier = $__5.value;
           {
             var parsedSpec = parseImportSpecifier(specifier, scope);
             if (parsedSpec) {
               parsedSpec.importLocation = node.loc;
               parsedSpec.moduleLocation = node.source.loc;
-              attemptModuleResolution(scope.path, node.source.value).then((function(resolvedPath) {
-                parsedSpec.moduleRequest = resolvedPath;
-              }));
+              parsedSpec.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, parsedSpec);
               scope.importedSymbols.push(parsedSpec);
             }
           }
-        };
-        for (var $__4 = node.specifiers[$traceurRuntime.toProperty(Symbol.iterator)](),
-            $__5; !($__5 = $__4.next()).done; ) {
-          $__12();
         }
       }
     })});
@@ -202,6 +199,7 @@ function decorateImportedSymbols(scope) {
       localName: null,
       location: null,
       moduleRequest: "notFound",
+      moduleRequestCallback: null,
       type: "import"
     };
     switch (spec.type) {
@@ -242,8 +240,8 @@ function decorateReferencedSymbols(scope) {
     {
       for (var $__6 = variable.references[$traceurRuntime.toProperty(Symbol.iterator)](),
           $__7; !($__7 = $__6.next()).done; ) {
-        var reference$__13 = $__7.value;
-        scope.referencedSymbols.push(reference$__13.identifier);
+        var reference$__12 = $__7.value;
+        scope.referencedSymbols.push(reference$__12.identifier);
       }
       for (var $__8 = variable.identifiers[$traceurRuntime.toProperty(Symbol.iterator)](),
           $__9; !($__9 = $__8.next()).done; ) {
@@ -262,8 +260,11 @@ function decorateReferencedSymbols(scope) {
       }
     })});
 }
-function attemptModuleResolution(basePath, moduleString) {
+function attemptModuleResolution(basePath, moduleString, spec) {
   return new Promise((function(resolve, reject) {
-    resolver.resolveModulePath(basePath, moduleString).then(resolve, reject);
+    resolver.resolveModulePath(basePath, moduleString).then((function(resolved) {
+      spec.moduleRequest = resolved;
+      resolve(resolved);
+    }));
   }));
 }

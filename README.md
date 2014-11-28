@@ -2,12 +2,9 @@
 
 ES6 Navigation is an [Atom](https://atom.io) package providing simple scope-sensitive Javascript navigation utilities with an eye to the future, providing support for navigating within and across [ES6](https://people.mozilla.org/~jorendorff/es6-draft.html) module boundaries.
 
-Why ES6? Javascript is known for its various idiosyncrasies - lack of block scoping, no native syntax for modularising code, to name but a few. ES6, or Harmony, provides solutions for these problems and introduces a host of new language features. Though there are ways and means of developing in ES6 today - Google's Traceur, 6to5, JSPM, ES6 polyfills, etcetera - there currently few tools available to ease the job. ES6 Navigation is a small building block in this direction.
+Why ES6? Javascript is known for its idiosyncrasies - among them a lack of block scoping and no native syntax for modularising code. ES6 provides solutions for these problems and introduces a host of new language features. Though there are ways and means of developing in ES6 today - Google's Traceur, 6to5, JSPM, ES6 polyfills, etcetera - there are currently few tools available to ease the job. ES6 Navigation is a small building block in this direction.
 
-ES6 Navigation uses [escope](https://github.com/estools/escope)  and Facebook's [esprima](https://github.com/facebook/esprima) fork behind the scenes to parse Javascript source files.
-
-## Installation
-To install directly, clone the repository and `cd` into the base directory. From here, simply run `apm install` followed by `apm link`.
+ES6 Navigation uses [escope](https://github.com/estools/escope)  and Facebook's [esprima](https://github.com/facebook/esprima) fork behind the scenes to parse source files.
 
 ## Features
 By default the following keybindings are provided:
@@ -20,9 +17,12 @@ Matching is scope-sensitive - two variables defined in different scopes but shar
 
 ES6 support and scope highlighting can be toggled in the configuration menu.
 
+## Installation
+To install directly, clone the repository and `cd` into the base directory. From here, simply run `apm install` followed by `apm link`.
+
 ## Troubleshooting
 
-## Roadmap?
+If the `status-bar` package is installed, issues will be shown on the status bar. More detail can be seen in the console warnings.
 
 ## Customising the Module Resolver
 By default, a heuristic resolver is used to find module paths. This can be changed by setting the `moduleResolver` configuration option to a resolver of your choice. The custom resolver must export a `resolveModulePath(file, module)` method that takes two parameters:
