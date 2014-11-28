@@ -1,6 +1,6 @@
 # Atom ES6 Navigation
 
-ES6 Navigation is an [Atom](https://atom.io) package providing simple scope-sensitive Javascript navigation utilities, in particular for ES6 Module binding navigation within and between module files.
+ES6 Navigation is an [Atom](https://atom.io) package providing simple scope-sensitive Javascript navigation utilities, in particular for navigating scoped bindings including between ES6 module files.
 
 When writing modules with ES6 module syntax, it can often be frustrating jumping between module files and instances of an import binding. The idea was to bring this control through simple key bindings using scope and module analysis.
 
