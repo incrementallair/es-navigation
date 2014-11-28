@@ -175,6 +175,8 @@ function highlightModuleSymbol(editor, symbol) {
   }
   function getClass(moduleRequest) {
     var cssClass = "module-resolved";
+    if (moduleRequest == "unresolved")
+      cssClass = "module-unresolved";
     if (moduleRequest == "notFound")
       cssClass = "module-not-found";
     if (moduleRequest == "parseError")

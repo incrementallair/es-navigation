@@ -133,6 +133,7 @@ function decorateExportedSymbols(scope) {
           return null;
         }
         result.importName = "*";
+        result.moduleRequest = "unresolved";
         result.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, result);
         result.moduleLocation = node.source.loc;
         break;
@@ -198,7 +199,7 @@ function decorateImportedSymbols(scope) {
       importName: null,
       localName: null,
       location: null,
-      moduleRequest: "notFound",
+      moduleRequest: "unresolved",
       moduleRequestCallback: null,
       type: "import"
     };
@@ -265,6 +266,8 @@ function attemptModuleResolution(basePath, moduleString, spec) {
     resolver.resolveModulePath(basePath, moduleString).then((function(resolved) {
       spec.moduleRequest = resolved;
       resolve(resolved);
+    }), (function(rejected) {
+      resolve(rejected);
     }));
   }));
 }

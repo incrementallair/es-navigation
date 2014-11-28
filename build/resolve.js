@@ -46,8 +46,8 @@ function resolveModulePath(basePath, moduleString) {
         basedir = path.join(basedir, "..");
       }
     } catch (error) {
-      return reject(error);
+      return reject("notFound");
     }
-    return reject(Error("Couldn't resolve " + moduleString));
+    return reject("notFound");
   }));
 }

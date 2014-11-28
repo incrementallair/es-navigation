@@ -7,7 +7,10 @@ Why ES6? Javascript is known for its idiosyncrasies - among them a lack of block
 ES6 Navigation uses [escope](https://github.com/estools/escope)  and Facebook's [esprima](https://github.com/facebook/esprima) fork behind the scenes to parse source files.
 
 ## Features
-By default the following keybindings are provided:
+
+### Current
+
+By default the following keybindings are provided for the symbol at cursor:
 * <kbd>Ctrl-Alt-N</kbd> : Jump to next match of symbol.
 * <kbd>Ctrl-Alt-P</kbd> : Jump to previous match of symbol.
 * <kbd>Ctrl-Alt-A</kbd> : Multi-select all matches of symbol.
@@ -16,6 +19,8 @@ By default the following keybindings are provided:
 Matching is scope-sensitive - two variables defined in different scopes but sharing a name are not matched, for instance. Navigation respects ES6 module syntax and can track definitions across module boundaries.
 
 ES6 support and scope highlighting can be toggled in the configuration menu.
+
+### Planned
 
 ## Installation
 To install directly, clone the repository and `cd` into the base directory. From here, simply run `apm install` followed by `apm link`.
