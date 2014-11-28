@@ -111,7 +111,7 @@ function decorateExportedSymbols(scope) {
       importName: null,
       exportName: null,
       localName: null,
-      location: null,
+      importLocation: null,
       moduleRequest: null,
       moduleRequestCallback: null,
       moduleLocation: null,
@@ -126,7 +126,7 @@ function decorateExportedSymbols(scope) {
           result.moduleLocation = node.source.loc;
         } else
           result.localName = spec.id.name;
-        result.location = spec.id.loc;
+        result.importLocation = spec.id.loc;
         result.exportName = spec.name ? spec.name.name : spec.id.name;
         if (!result.moduleRequest)
           scope.referencedSymbols.push(spec.id);

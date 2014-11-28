@@ -105,6 +105,9 @@ function toDefinition() {
       return;
     }
   }
+  updateStatusBar('ESNav: could not find binding');
+  clearModuleHighlights();
+  highlightImport(editor, {position: editor.getCursorBufferPosition()});
 }
 function clearDefinitionStack() {
   definitionState = 0;
@@ -170,14 +173,14 @@ function highlightImport(editor, params) {
   if (!scopes)
     return;
   var scope = scopes[0];
-  for (var $__7 = scope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+  for (var $__7 = scope.importedSymbols.concat(scope.exportedSymbols)[$traceurRuntime.toProperty(Symbol.iterator)](),
       $__8; !($__8 = $__7.next()).done; ) {
     var symbol = $__8.value;
     {
       var match = false;
       if (params.symbol && symbol.localName == params.symbol.name)
         match = true;
-      if (params.position && positionIsInsideLocation(params.position, symbol.importLocation))
+      if (symbol.importLocation && params.position && positionIsInsideLocation(params.position, symbol.importLocation))
         match = true;
       if (match) {
         highlightModuleSymbol(editor, symbol);

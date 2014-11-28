@@ -59,7 +59,7 @@ function getDefinitionAtPosition(buffer, path, position) {
         $__6; !($__6 = $__5.next()).done; ) {
       var symbol$__8 = $__6.value;
       {
-        if (positionIsInsideLocation(position, symbol$__8.location))
+        if (symbol$__8.importLocation && positionIsInsideLocation(position, symbol$__8.importLocation))
           if (symbol$__8.moduleRequest)
             result.definition = findSymbolDefinition(symbol$__8.importName, symbol$__8.moduleRequest, null, true, scope);
       }
