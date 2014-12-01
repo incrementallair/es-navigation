@@ -16,7 +16,7 @@ function resolveModulePath(basePath, moduleString) {
   try {
     var res = resolve.sync(moduleString, {basedir: basedir});
     if (res != moduleString)
-      return Promise.resolve(res);
+      return res;
   } catch (error) {
     return heuristicResolver(basePath, moduleString);
   }
@@ -27,14 +27,14 @@ function heuristicResolver(basePath, moduleString) {
   var basedir = path.dirname(basePath);
   var baseext = path.extname(basePath);
   if (path.extname(moduleString) != baseext)
-    moduleString += baseext;
+    var _moduleString = moduleString + baseext;
   var basemod,
       remmod;
-  var splitModule = moduleString.split(path.sep);
+  var splitModule = _moduleString.split(path.sep);
   if (splitModule.length == 1 || splitModule[0] == '.') {
     if (splitModule[0] == '.')
       failsafeMax = 1;
-    basemod = moduleString;
+    basemod = _moduleString;
     remmod = "";
   } else {
     basemod = splitModule[0];
@@ -57,12 +57,12 @@ function heuristicResolver(basePath, moduleString) {
       {
         var attempt = path.join(basedir, basemod, lib, remmod);
         if (fs.existsSync(attempt))
-          return Promise.resolve(attempt);
+          return attempt;
       }
     }
     basedir = path.join(basedir, "..");
   }
-  return Promise.reject(moduleString + " not found from " + basePath + ".");
+  return new Error(moduleString + " not found from " + basePath + ".");
 }
 function readFileIfExists(path) {
   try {

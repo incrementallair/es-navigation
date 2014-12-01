@@ -127,8 +127,7 @@ function decorateExportedSymbols(scope) {
       case "ExportSpecifier":
         if (node.source) {
           result.importName = spec.id.name;
-          result.moduleRequest = "unresolved";
-          result.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, result);
+          result.moduleRequest = attemptModuleResolution(scope.path, node.source.value);
           result.moduleLocation = node.source.loc;
         } else {
           result.localName = spec.id.name;
@@ -145,8 +144,7 @@ function decorateExportedSymbols(scope) {
           return null;
         }
         result.importName = "*";
-        result.moduleRequest = "unresolved";
-        result.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, result);
+        result.moduleRequest = attemptModuleResolution(scope.path, node.source.value);
         result.moduleLocation = node.source.loc;
         break;
       default:
@@ -192,8 +190,7 @@ function decorateImportedSymbols(scope) {
           };
           if (node.source) {
             parsedSpec.moduleLocation = node.source.loc;
-            parsedSpec.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, parsedSpec);
-            parsedSpec.moduleRequest = "unresolved";
+            parsedSpec.moduleRequest = attemptModuleResolution(scope.path, node.source.value);
           }
           scope.importedSymbols.push(parsedSpec);
         }
@@ -205,7 +202,7 @@ function decorateImportedSymbols(scope) {
             if (parsedSpec$__13) {
               parsedSpec$__13.importLocation = node.loc;
               parsedSpec$__13.moduleLocation = node.source.loc;
-              parsedSpec$__13.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, parsedSpec$__13);
+              parsedSpec$__13.moduleRequest = attemptModuleResolution(scope.path, node.source.value);
               scope.importedSymbols.push(parsedSpec$__13);
             }
           }
@@ -279,13 +276,10 @@ function decorateReferencedSymbols(scope) {
       }
     })});
 }
-function attemptModuleResolution(basePath, moduleString, spec) {
-  return new Promise((function(resolve, reject) {
-    resolver.resolveModulePath(basePath, moduleString).then((function(resolved) {
-      spec.moduleRequest = resolved;
-      resolve(resolved);
-    }), (function(rejected) {
-      resolve("notFound");
-    }));
-  }));
+function attemptModuleResolution(basePath, moduleString) {
+  try {
+    return resolver.resolveModulePath(basePath, moduleString);
+  } catch (error) {
+    return "notFound";
+  }
 }

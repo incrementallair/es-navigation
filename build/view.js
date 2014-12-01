@@ -207,9 +207,6 @@ function highlightModuleSymbol(editor, symbol) {
       type: 'highlight',
       class: getClass(symbol.moduleRequest)
     });
-    symbol.moduleRequestCallback.then((function(resolved) {
-      highlight.properties.class = getClass(resolved);
-    }));
     moduleHighlights.get(path).push(highlight);
   }
   function getClass(moduleRequest) {
