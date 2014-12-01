@@ -1,6 +1,6 @@
-# Atom ES6 Navigation
+# Atom ES Navigation
 
-ES6 Navigation is an [Atom](https://atom.io) package providing simple scope-sensitive Javascript navigation utilities - in particular, for scoped bindings across ES6 module boundaries.
+*ES Navigation* is an [Atom](https://atom.io) package providing simple scope-sensitive Javascript navigation utilities - in particular, for scoped bindings across ES6 module boundaries.
 
 When writing modules with ES6 module syntax, it can be frustrating to navigate between module files and instances of an import binding. The idea is to introduce this control via simple key bindings, using scope and module analysis.
 
@@ -13,8 +13,11 @@ By default the following keybindings are provided:
 * <kbd>Ctrl-Alt-P</kbd> : Jump to previous match of binding.
 * <kbd>Ctrl-Alt-A</kbd> : Multi-select all matches of binding. Useful for bulk-renaming variables or ES6 export names.
 
-## Customising the Module Loader
-See the [wiki](https://github.com/incrementallair/es-navigation/wiki/Customising-the-Module-Resolver).
+## Customising the Module Resolver
+
+By default, a heuristic module resolver is used that guessed the baseURL for packages.
+
+[See the wiki](https://github.com/incrementallair/es-navigation/wiki/Customising-the-Module-Resolver) for setting up a custom resolver.
 
 ## License
 
