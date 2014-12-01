@@ -12,9 +12,6 @@ var fs = ($__fs__ = require("fs"), $__fs__ && $__fs__.__esModule && $__fs__ || {
 var path = ($__path__ = require("path"), $__path__ && $__path__.__esModule && $__path__ || {default: $__path__}).default;
 var resolve = ($__resolve__ = require("resolve"), $__resolve__ && $__resolve__.__esModule && $__resolve__ || {default: $__resolve__}).default;
 function resolveModulePath(basePath, moduleString) {
-  return heuristicResolver(basePath, moduleString);
-}
-function heuristicResolver(basePath, moduleString) {
   var failsafeMax = 10;
   var basedir = path.dirname(basePath);
   var baseext = path.extname(basePath);
@@ -54,7 +51,7 @@ function heuristicResolver(basePath, moduleString) {
     }
     basedir = path.join(basedir, "..");
   }
-  return new Error(moduleString + " not found from " + basePath + ".");
+  throw new Error(moduleString + " not found from " + basePath + ".");
 }
 function readFileIfExists(path) {
   try {
@@ -63,6 +60,6 @@ function readFileIfExists(path) {
     return null;
   } catch (e) {
     console.error(e);
-    throw e;
+    return null;
   }
 }
