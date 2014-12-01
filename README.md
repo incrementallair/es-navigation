@@ -1,8 +1,8 @@
 # Atom ES Navigation
 
-*ES Navigation* is an [Atom](https://atom.io) package providing simple scope-sensitive Javascript navigation utilities - in particular, for scoped bindings across ES6 module boundaries.
+*ES Navigation* is an [Atom](https://atom.io) provides keyboard shortcuts for jumping between scoped bindings in JavaScript, including between separate ES6 module files.
 
-When writing modules with ES6 module syntax, it can be frustrating to navigate between module files and instances of an import binding. The idea is to introduce this control via simple key bindings, using scope and module analysis.
+When writing modular code, it can be frustrating navigating between separate module files - using these shortcuts easily jump straight to the ES6 module definition of any imported binding.
 
 ![Usage Gif](https://raw.githubusercontent.com/incrementallair/es-navigation/master/es-navigate-demo.gif)
 
