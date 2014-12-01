@@ -59,7 +59,8 @@ function toDefinition() {
     if (definitionState === 0)
       definitionStack = {
         path: editor.getPath(),
-        pos: cursor
+        pos: cursor,
+        range: null
       };
     if (def.globalScope) {
       for (var $__4 = def.globalScope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
@@ -67,6 +68,8 @@ function toDefinition() {
         var symbol = $__5.value;
         {
           if (positionIsInsideLocation(cursor, symbol.importLocation)) {
+            if (symbol.location)
+              definitionStack.range = createRangeFromLocation(symbol.location);
             if (def.definition) {
               var position = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
               return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
@@ -83,6 +86,7 @@ function toDefinition() {
       }
     }
     if (def.import && definitionState === 0) {
+      definitionStack.range = createRangeFromLocation(def.import.location);
       var position$__7 = [def.import.location.start.line - 1, def.import.location.start.column + def.relativePosition];
       return jumpToLocationFrom(def.import.location, editor.getPath(), editor, {
         state: 1,
@@ -97,10 +101,8 @@ function toDefinition() {
       });
     }
     if (definitionState > 0) {
-      jumpToPositionFrom(definitionStack.pos, definitionStack.path, editor, {state: 0});
+      jumpToPositionFrom(definitionStack.pos, definitionStack.path, editor, {state: 0}, definitionStack.range);
       clearDefinitionStack();
-      clearModuleHighlights();
-      highlightImport(editor, {position: definitionStack.pos});
       return;
     }
   }
