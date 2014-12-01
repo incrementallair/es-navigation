@@ -32,7 +32,10 @@ function doParse(buffer, path) {
   };
 }
 function parseBuffer(buffer, path) {
-  var $__12 = doParse(buffer, path),
+  var parsedBuffer = doParse(buffer, path);
+  if (!parsedBuffer)
+    return null;
+  var $__12 = parsedBuffer,
       scopes = $__12.scopes,
       syntaxTree = $__12.syntaxTree;
   scopes.map((function(scope) {

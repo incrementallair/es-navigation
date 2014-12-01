@@ -12,6 +12,17 @@ var fs = ($__fs__ = require("fs"), $__fs__ && $__fs__.__esModule && $__fs__ || {
 var path = ($__path__ = require("path"), $__path__ && $__path__.__esModule && $__path__ || {default: $__path__}).default;
 var resolve = ($__resolve__ = require("resolve"), $__resolve__ && $__resolve__.__esModule && $__resolve__ || {default: $__resolve__}).default;
 function resolveModulePath(basePath, moduleString) {
+  var basedir = path.dirname(basePath);
+  try {
+    var res = resolve.sync(moduleString, {basedir: basedir});
+    if (res != moduleString)
+      return Promise.resolve(res);
+  } catch (error) {
+    return heuristicResolver(basePath, moduleString);
+  }
+  return heuristicResolver(basePath, moduleString);
+}
+function heuristicResolver(basePath, moduleString) {
   var failsafeMax = 10;
   var basedir = path.dirname(basePath);
   var baseext = path.extname(basePath);
