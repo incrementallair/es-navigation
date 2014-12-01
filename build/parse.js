@@ -43,9 +43,9 @@ function parseBuffer(buffer, path) {
     scope.definedSymbols = [];
   }));
   scopes.map(decorateReferencedSymbols);
-  scopes.map(decorateImportedSymbols);
-  scopes.map(decorateExportedSymbols);
   scopes.map(decorateDefinedSymbols);
+  decorateImportedSymbols(scopes[0]);
+  decorateExportedSymbols(scopes[0]);
   scopes.map((function(scope) {
     scope.referencedSymbols = removeDuplicates(scope.referencedSymbols);
     scope.definedSymbols = removeDuplicates(scope.definedSymbols);

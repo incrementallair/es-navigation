@@ -55,10 +55,11 @@ function resolveModulePath(basePath, moduleString) {
 }
 function readFileIfExists(path) {
   try {
-    return fs.readFileSync(path);
+    if (fs.existsSync(path))
+      return fs.readFileSync(path);
+    return null;
   } catch (e) {
-    if (e.code === 'ENOENT')
-      return null;
+    console.error(e);
     throw e;
   }
 }
