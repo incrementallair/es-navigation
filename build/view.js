@@ -66,22 +66,24 @@ function toDefinition() {
         path: editor.getPath(),
         pos: cursor
       };
-    for (var $__7 = def.globalScope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
-        $__8; !($__8 = $__7.next()).done; ) {
-      var symbol = $__8.value;
-      {
-        if (positionIsInsideLocation(cursor, symbol.importLocation)) {
-          if (def.definition) {
-            var position = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
-            return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
-              state: 2,
-              position: position
-            });
+    if (def.globalScope) {
+      for (var $__7 = def.globalScope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+          $__8; !($__8 = $__7.next()).done; ) {
+        var symbol = $__8.value;
+        {
+          if (positionIsInsideLocation(cursor, symbol.importLocation)) {
+            if (def.definition) {
+              var position = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
+              return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
+                state: 2,
+                position: position
+              });
+            }
+            clearModuleHighlights();
+            highlightImport(editor, {position: editor.getCursorBufferPosition()});
+            if (["unresolved", "notFound", "parseError"].indexOf(symbol.moduleRequest) == -1)
+              return jumpToPositionFrom([0, 0], symbol.moduleRequest, editor, {state: 1});
           }
-          clearModuleHighlights();
-          highlightImport(editor, {position: editor.getCursorBufferPosition()});
-          if (["unresolved", "notFound", "parseError"].indexOf(symbol.moduleRequest) == -1)
-            return jumpToPositionFrom([0, 0], symbol.moduleRequest, editor, {state: 1});
         }
       }
     }
@@ -102,6 +104,8 @@ function toDefinition() {
     if (definitionState > 0) {
       jumpToPositionFrom(definitionStack.pos, definitionStack.path, editor, {state: 0});
       clearDefinitionStack();
+      clearModuleHighlights();
+      highlightImport(editor, {position: definitionStack.pos});
       return;
     }
   }
