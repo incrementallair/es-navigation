@@ -7,10 +7,8 @@ Object.defineProperties(exports, {
 });
 var $__cache__,
     $__fs__;
-'use strict';
 var parseBuffer = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).parseBuffer;
 var fs = ($__fs__ = require("fs"), $__fs__ && $__fs__.__esModule && $__fs__ || {default: $__fs__}).default;
-;
 function findSymbolDefinition(symbol, path) {
   var namespace = arguments[2] !== (void 0) ? arguments[2] : null;
   var isRoot = arguments[3] !== (void 0) ? arguments[3] : true;

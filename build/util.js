@@ -21,14 +21,7 @@ Object.defineProperties(exports, {
   __esModule: {value: true}
 });
 var $__view__;
-'use strict';
 var highlightImport = ($__view__ = require("./view"), $__view__ && $__view__.__esModule && $__view__ || {default: $__view__}).highlightImport;
-;
-;
-;
-;
-;
-;
 function getMemberExpressionString(node) {
   if (node.type === "Identifier")
     return node.name;
@@ -40,29 +33,21 @@ function getMemberExpressionString(node) {
   return null;
 }
 function positionIsInsideLocation(pos, loc) {
-  if (pos.row < loc.start.line - 1)
+  if (pos.row < loc.start.line - 1 || pos.row > loc.end.line - 1)
     return false;
-  if (pos.row > loc.end.line - 1)
+  if (pos.row == loc.start.line - 1 && pos.column < loc.start.column)
     return false;
-  if (pos.row == loc.start.line - 1)
-    if (pos.column < loc.start.column)
-      return false;
-  if (pos.row == loc.end.line - 1)
-    if (pos.column > loc.end.column)
-      return false;
+  if (pos.row == loc.end.line - 1 && pos.column > loc.end.column)
+    return false;
   return true;
 }
 function containedWithin(a, b) {
-  if (a.start.line < b.start.line)
+  if (a.start.line < b.start.line || a.end.line > b.end.line)
     return false;
-  if (a.end.line > b.end.line)
+  if (a.start.line === b.start.line && a.start.column < b.start.column)
     return false;
-  if (a.start.line === b.start.line)
-    if (a.start.column < b.start.column)
-      return false;
-  if (a.end.line === b.end.line)
-    if (a.end.column > b.end.column)
-      return false;
+  if (a.end.line === b.end.line && a.end.column > b.end.column)
+    return false;
   return true;
 }
 function compareIdentifierLocations(a, b) {

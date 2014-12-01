@@ -9,26 +9,32 @@ var $__esprima_45_fb__,
     $__escope__,
     $__estraverse__,
     $__util__;
-'use strict';
 var esprima = ($__esprima_45_fb__ = require("esprima-fb"), $__esprima_45_fb__ && $__esprima_45_fb__.__esModule && $__esprima_45_fb__ || {default: $__esprima_45_fb__}).default;
 var escope = ($__escope__ = require("escope"), $__escope__ && $__escope__.__esModule && $__escope__ || {default: $__escope__}).default;
 var estraverse = ($__estraverse__ = require("estraverse"), $__estraverse__ && $__estraverse__.__esModule && $__estraverse__ || {default: $__estraverse__}).default;
 var getMemberExpressionString = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}).getMemberExpressionString;
-;
 var resolverPath = atom.config.get("moduleResolver");
 var resolver = require(resolverPath ? resolverPath : './resolve');
-function parseBuffer(buffer, path) {
-  var scopes;
+function doParse(buffer, path) {
   try {
     var syntaxTree = esprima.parse(buffer, {
       loc: true,
       tolerant: true
     });
-    scopes = escope.analyze(syntaxTree, {ecmaVersion: 6}).scopes;
+    var scopes = escope.analyze(syntaxTree, {ecmaVersion: 6}).scopes;
   } catch (error) {
     console.warn("Error parsing AST/scopes: " + error + " in " + path + "\nPossibly not an ES6 module.");
     return null;
   }
+  return {
+    scopes: scopes,
+    syntaxTree: syntaxTree
+  };
+}
+function parseBuffer(buffer, path) {
+  var $__12 = doParse(buffer, path),
+      scopes = $__12.scopes,
+      syntaxTree = $__12.syntaxTree;
   scopes.map((function(scope) {
     scope.path = path;
     scope.referencedSymbols = [];
@@ -192,12 +198,12 @@ function decorateImportedSymbols(scope) {
             $__5; !($__5 = $__4.next()).done; ) {
           var specifier = $__5.value;
           {
-            var parsedSpec$__12 = parseImportSpecifier(specifier, scope);
-            if (parsedSpec$__12) {
-              parsedSpec$__12.importLocation = node.loc;
-              parsedSpec$__12.moduleLocation = node.source.loc;
-              parsedSpec$__12.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, parsedSpec$__12);
-              scope.importedSymbols.push(parsedSpec$__12);
+            var parsedSpec$__13 = parseImportSpecifier(specifier, scope);
+            if (parsedSpec$__13) {
+              parsedSpec$__13.importLocation = node.loc;
+              parsedSpec$__13.moduleLocation = node.source.loc;
+              parsedSpec$__13.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, parsedSpec$__13);
+              scope.importedSymbols.push(parsedSpec$__13);
             }
           }
         }
@@ -250,8 +256,8 @@ function decorateReferencedSymbols(scope) {
     {
       for (var $__6 = variable.references[$traceurRuntime.toProperty(Symbol.iterator)](),
           $__7; !($__7 = $__6.next()).done; ) {
-        var reference$__13 = $__7.value;
-        scope.referencedSymbols.push(reference$__13.identifier);
+        var reference$__14 = $__7.value;
+        scope.referencedSymbols.push(reference$__14.identifier);
       }
       for (var $__8 = variable.identifiers[$traceurRuntime.toProperty(Symbol.iterator)](),
           $__9; !($__9 = $__8.next()).done; ) {

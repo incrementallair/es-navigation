@@ -1,59 +1,54 @@
 "use strict";
 Object.defineProperties(exports, {
-  toNextIdentifier: {get: function() {
-      return toNextIdentifier;
-    }},
-  selectAllIdentifiers: {get: function() {
-      return selectAllIdentifiers;
-    }},
   toDefinition: {get: function() {
       return toDefinition;
-    }},
-  clearHighlight: {get: function() {
-      return clearHighlight;
-    }},
-  clearStatusBar: {get: function() {
-      return clearStatusBar;
     }},
   clearDefinitionStack: {get: function() {
       return clearDefinitionStack;
     }},
-  clearModuleHighlights: {get: function() {
-      return clearModuleHighlights;
+  selectAllIdentifiers: {get: function() {
+      return selectAllIdentifiers;
     }},
-  highlightImport: {get: function() {
-      return highlightImport;
+  toNextIdentifier: {get: function() {
+      return toNextIdentifier;
+    }},
+  toPrevIdentifier: {get: function() {
+      return toPrevIdentifier;
     }},
   createStatusBarView: {get: function() {
       return createStatusBarView;
     }},
+  highlightImport: {get: function() {
+      return highlightImport;
+    }},
+  clearModuleHighlights: {get: function() {
+      return clearModuleHighlights;
+    }},
+  clearHighlight: {get: function() {
+      return clearHighlight;
+    }},
   updateStatusBar: {get: function() {
       return updateStatusBar;
+    }},
+  clearStatusBar: {get: function() {
+      return clearStatusBar;
     }},
   __esModule: {value: true}
 });
 var $__status_45_bar__,
     $__cache__,
     $__util__,
-    $__util__,
-    $__navigate__,
-    $__navigate__,
     $__navigate__;
-'use strict';
 var StatusBarView = ($__status_45_bar__ = require("./status-bar"), $__status_45_bar__ && $__status_45_bar__.__esModule && $__status_45_bar__ || {default: $__status_45_bar__}).default;
 var parseBuffer = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).parseBuffer;
 var $__2 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
     getActiveEditor = $__2.getActiveEditor,
-    createRangeFromLocation = $__2.createRangeFromLocation;
-var positionIsInsideLocation = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}).positionIsInsideLocation;
-var getReferencesAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getReferencesAtPosition;
-var getNextReference = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getNextReference;
-var getDefinitionAtPosition = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}).getDefinitionAtPosition;
-;
-;
-;
-;
-;
+    createRangeFromLocation = $__2.createRangeFromLocation,
+    positionIsInsideLocation = $__2.positionIsInsideLocation;
+var $__3 = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}),
+    getReferencesAtPosition = $__3.getReferencesAtPosition,
+    getNextReference = $__3.getNextReference,
+    getDefinitionAtPosition = $__3.getDefinitionAtPosition;
 var definitionStack = null,
     definitionState = 0;
 function toDefinition() {
@@ -67,9 +62,9 @@ function toDefinition() {
         pos: cursor
       };
     if (def.globalScope) {
-      for (var $__7 = def.globalScope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__8; !($__8 = $__7.next()).done; ) {
-        var symbol = $__8.value;
+      for (var $__4 = def.globalScope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+          $__5; !($__5 = $__4.next()).done; ) {
+        var symbol = $__5.value;
         {
           if (positionIsInsideLocation(cursor, symbol.importLocation)) {
             if (def.definition) {
@@ -88,17 +83,17 @@ function toDefinition() {
       }
     }
     if (def.import && definitionState === 0) {
-      var position$__10 = [def.import.location.start.line - 1, def.import.location.start.column + def.relativePosition];
+      var position$__7 = [def.import.location.start.line - 1, def.import.location.start.column + def.relativePosition];
       return jumpToLocationFrom(def.import.location, editor.getPath(), editor, {
         state: 1,
-        position: position$__10
+        position: position$__7
       });
     }
     if (def.definition && definitionState < 2) {
-      var position$__11 = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
+      var position$__8 = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
       return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
         state: 2,
-        position: position$__11
+        position: position$__8
       });
     }
     if (definitionState > 0) {
@@ -120,14 +115,14 @@ function selectAllIdentifiers() {
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
-    var $__9 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
-        id = $__9.id,
-        references = $__9.references,
-        scope = $__9.scope;
+    var $__6 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
+        id = $__6.id,
+        references = $__6.references,
+        scope = $__6.scope;
     if (references && id) {
-      for (var $__7 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__8; !($__8 = $__7.next()).done; ) {
-        var reference = $__8.value;
+      for (var $__4 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
+          $__5; !($__5 = $__4.next()).done; ) {
+        var reference = $__5.value;
         {
           var range = createRangeFromLocation(reference.loc);
           editor.addSelectionForBufferRange(range);
@@ -143,15 +138,20 @@ function selectAllIdentifiers() {
   }
 }
 function toNextIdentifier() {
-  var skip = arguments[0] !== (void 0) ? arguments[0] : 1;
+  toIdentifier(1);
+}
+function toPrevIdentifier() {
+  toIdentifier(-1);
+}
+function toIdentifier(skip) {
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
-    var $__9 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}),
-        id = $__9.id,
-        references = $__9.references,
-        scope = $__9.scope,
-        relativePosition = $__9.relativePosition;
+    var $__6 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}),
+        id = $__6.id,
+        references = $__6.references,
+        scope = $__6.scope,
+        relativePosition = $__6.relativePosition;
     if (id && references) {
       var next = getNextReference(id, references, skip);
       var position = [next.loc.start.line - 1, next.loc.start.column + relativePosition];
@@ -159,8 +159,9 @@ function toNextIdentifier() {
       ourStatusBar.updateText((references.indexOf(id) + 1) + "/" + references.length + " matches");
       if (scope.type != "global")
         highlightScope(scope, editor);
-    } else
+    } else {
       updateStatusBar("ESNav: couldn't find symbol.");
+    }
   }
 }
 var ourStatusBar = null;
@@ -177,9 +178,9 @@ function highlightImport(editor, params) {
   if (!scopes)
     return;
   var scope = scopes[0];
-  for (var $__7 = scope.importedSymbols.concat(scope.exportedSymbols)[$traceurRuntime.toProperty(Symbol.iterator)](),
-      $__8; !($__8 = $__7.next()).done; ) {
-    var symbol = $__8.value;
+  for (var $__4 = scope.importedSymbols.concat(scope.exportedSymbols)[$traceurRuntime.toProperty(Symbol.iterator)](),
+      $__5; !($__5 = $__4.next()).done; ) {
+    var symbol = $__5.value;
     {
       var match = false;
       if (params.symbol && symbol.localName == params.symbol.name)
@@ -224,9 +225,9 @@ function highlightModuleSymbol(editor, symbol) {
 }
 function clearModuleHighlights(path) {
   if (moduleHighlights.has(path)) {
-    for (var $__7 = moduleHighlights.get(path)[$traceurRuntime.toProperty(Symbol.iterator)](),
-        $__8; !($__8 = $__7.next()).done; ) {
-      var highlight = $__8.value;
+    for (var $__4 = moduleHighlights.get(path)[$traceurRuntime.toProperty(Symbol.iterator)](),
+        $__5; !($__5 = $__4.next()).done; ) {
+      var highlight = $__5.value;
       highlight.getMarker().destroy();
     }
     moduleHighlights[path] = [];
@@ -268,8 +269,8 @@ function clearStatusBar() {
 }
 function jumpToLocationFrom(location, path, editor, params) {
   var range = createRangeFromLocation(location);
-  var position = [range[0][0], range[0][1]];
-  jumpToPositionFrom(params.position ? params.position : position, path, editor, params, range);
+  var position = params.position || [range[0][0], range[0][1]];
+  jumpToPositionFrom(position, path, editor, params, range);
 }
 function jumpToPositionFrom(position, path, editor, params) {
   var range = arguments[4] !== (void 0) ? arguments[4] : null;

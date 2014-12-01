@@ -1,28 +1,24 @@
 "use strict";
 Object.defineProperties(exports, {
+  getDefinitionAtPosition: {get: function() {
+      return getDefinitionAtPosition;
+    }},
   getReferencesAtPosition: {get: function() {
       return getReferencesAtPosition;
     }},
   getNextReference: {get: function() {
       return getNextReference;
     }},
-  getDefinitionAtPosition: {get: function() {
-      return getDefinitionAtPosition;
-    }},
   __esModule: {value: true}
 });
 var $__util__,
     $__cache__,
     $__search__;
-'use strict';
 var $__0 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
     positionIsInsideLocation = $__0.positionIsInsideLocation,
     compareIdentifierLocations = $__0.compareIdentifierLocations;
 var parseBuffer = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).parseBuffer;
 var findSymbolDefinition = ($__search__ = require("./search"), $__search__ && $__search__.__esModule && $__search__ || {default: $__search__}).findSymbolDefinition;
-;
-;
-;
 function getDefinitionAtPosition(buffer, path, position) {
   var result = {
     import: null,
@@ -50,10 +46,11 @@ function getDefinitionAtPosition(buffer, path, position) {
           result.import = symbol;
       }
     }
-    if (id.property && id.object)
+    if (id.property && id.object) {
       result.definition = findSymbolDefinition(id.property, path, id.object, true, scope);
-    else
+    } else {
       result.definition = findSymbolDefinition(id.name, path, null, true, scope);
+    }
   } else if (globalScope) {
     for (var $__5 = globalScope.exportedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
         $__6; !($__6 = $__5.next()).done; ) {
