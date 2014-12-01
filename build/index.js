@@ -6,10 +6,6 @@ main.config = {
     default: true,
     type: 'boolean'
   },
-  es6Support: {
-    default: true,
-    type: 'boolean'
-  },
   moduleResolver: {
     default: './resolve',
     type: 'string'

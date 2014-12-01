@@ -54,7 +54,7 @@ var getDefinitionAtPosition = ($__navigate__ = require("./navigate"), $__navigat
 ;
 ;
 ;
-var definitionStack = [],
+var definitionStack = null,
     definitionState = 0;
 function toDefinition() {
   var editor = getActiveEditor();
@@ -62,10 +62,10 @@ function toDefinition() {
     var cursor = editor.getCursorBufferPosition();
     var def = getDefinitionAtPosition(editor.getText(), editor.getPath(), cursor);
     if (definitionState === 0)
-      definitionStack = [{
+      definitionStack = {
         path: editor.getPath(),
         pos: cursor
-      }];
+      };
     for (var $__7 = def.globalScope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
         $__8; !($__8 = $__7.next()).done; ) {
       var symbol = $__8.value;
@@ -100,7 +100,7 @@ function toDefinition() {
       });
     }
     if (definitionState > 0) {
-      jumpToPositionFrom(definitionStack[0].pos, definitionStack[0].path, editor, {state: 0});
+      jumpToPositionFrom(definitionStack.pos, definitionStack.path, editor, {state: 0});
       clearDefinitionStack();
       return;
     }

@@ -24,10 +24,7 @@ function parseBuffer(buffer, path) {
       loc: true,
       tolerant: true
     });
-    if (atom.config.get("es-navigation.es6Support"))
-      scopes = escope.analyze(syntaxTree, {ecmaVersion: 6}).scopes;
-    else
-      scopes = escope.analyze(syntaxTree, {ecmaVersion: 5}).scopes;
+    scopes = escope.analyze(syntaxTree, {ecmaVersion: 6}).scopes;
   } catch (error) {
     console.warn("Error parsing AST/scopes: " + error + " in " + path + "\nPossibly not an ES6 module.");
     return null;
