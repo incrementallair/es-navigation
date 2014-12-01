@@ -121,8 +121,10 @@ function decorateExportedSymbols(scope) {
           result.moduleRequest = "unresolved";
           result.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, result);
           result.moduleLocation = node.source.loc;
-        } else
+        } else {
           result.localName = spec.id.name;
+          scope.referencedSymbols.push(spec.id);
+        }
         result.importLocation = spec.id.loc;
         result.exportName = spec.name ? spec.name.name : spec.id.name;
         if (!result.moduleRequest)
@@ -169,27 +171,33 @@ function decorateImportedSymbols(scope) {
   estraverse.traverse(scope.block, {enter: (function(node, parent) {
       if (node.type == "ImportDeclaration") {
         if (node.specifiers.length === 0) {
-          scope.importedSymbols.push({
+          var parsedSpec = {
             importName: "*emptyImport*",
             localName: "*emptyImport*",
             location: null,
             moduleLocation: null,
-            moduleRequest: "notFound",
+            moduleRequest: null,
             moduleRequestCallback: null,
             importLocation: node.loc,
             type: "import"
-          });
+          };
+          if (node.source) {
+            parsedSpec.moduleLocation = node.source.loc;
+            parsedSpec.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, parsedSpec);
+            parsedSpec.moduleRequest = "unresolved";
+          }
+          scope.importedSymbols.push(parsedSpec);
         }
         for (var $__4 = node.specifiers[$traceurRuntime.toProperty(Symbol.iterator)](),
             $__5; !($__5 = $__4.next()).done; ) {
           var specifier = $__5.value;
           {
-            var parsedSpec = parseImportSpecifier(specifier, scope);
-            if (parsedSpec) {
-              parsedSpec.importLocation = node.loc;
-              parsedSpec.moduleLocation = node.source.loc;
-              parsedSpec.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, parsedSpec);
-              scope.importedSymbols.push(parsedSpec);
+            var parsedSpec$__12 = parseImportSpecifier(specifier, scope);
+            if (parsedSpec$__12) {
+              parsedSpec$__12.importLocation = node.loc;
+              parsedSpec$__12.moduleLocation = node.source.loc;
+              parsedSpec$__12.moduleRequestCallback = attemptModuleResolution(scope.path, node.source.value, parsedSpec$__12);
+              scope.importedSymbols.push(parsedSpec$__12);
             }
           }
         }
@@ -242,8 +250,8 @@ function decorateReferencedSymbols(scope) {
     {
       for (var $__6 = variable.references[$traceurRuntime.toProperty(Symbol.iterator)](),
           $__7; !($__7 = $__6.next()).done; ) {
-        var reference$__12 = $__7.value;
-        scope.referencedSymbols.push(reference$__12.identifier);
+        var reference$__13 = $__7.value;
+        scope.referencedSymbols.push(reference$__13.identifier);
       }
       for (var $__8 = variable.identifiers[$traceurRuntime.toProperty(Symbol.iterator)](),
           $__9; !($__9 = $__8.next()).done; ) {

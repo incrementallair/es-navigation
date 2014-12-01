@@ -54,7 +54,7 @@ function getDefinitionAtPosition(buffer, path, position) {
       result.definition = findSymbolDefinition(id.property, path, id.object, true, scope);
     else
       result.definition = findSymbolDefinition(id.name, path, null, true, scope);
-  } else {
+  } else if (globalScope) {
     for (var $__5 = globalScope.exportedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
         $__6; !($__6 = $__5.next()).done; ) {
       var symbol$__8 = $__6.value;
@@ -85,13 +85,14 @@ function getReferencesAtPosition(buffer, path, position) {
       }
     }
   }
+  var globalScope = scopes[0] ? scopes[0] : null;
   return {
     id: null,
     references: null,
     scope: null,
     relativePosition: null,
     imports: null,
-    globalScope: scopes[0]
+    globalScope: globalScope
   };
 }
 function getReferencesAtPositionInScope(scope, position) {

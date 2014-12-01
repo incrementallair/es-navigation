@@ -20,7 +20,7 @@ function findSymbolDefinition(symbol, path) {
   if (path == "unresolved")
     return null;
   if (path == "notFound") {
-    console.warn("Symbol \"" + symbol + "\" was imported from a  module that couldn't be resolved.");
+    console.warn("Module not resolved.");
     return null;
   }
   if (!scope) {
