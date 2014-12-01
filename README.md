@@ -13,7 +13,7 @@ By default the following keybindings are provided:
 * <kbd>Ctrl-Alt-P</kbd> : Jump to previous match of binding.
 * <kbd>Ctrl-Alt-A</kbd> : Multi-select all matches of binding. Useful for bulk-renaming variables or ES6 export names.
 
-# Customising the Module Loader
+## Customising the Module Loader
 See the [wiki](https://github.com/incrementallair/es-navigation/wiki/Customising-the-Module-Resolver).
 
 ## License
