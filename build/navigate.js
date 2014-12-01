@@ -85,7 +85,7 @@ function getReferencesAtPosition(buffer, path, position) {
       }
     }
   }
-  var globalScope = scopes[0] ? scopes[0] : null;
+  var globalScope = scopes ? scopes[0] : null;
   return {
     id: null,
     references: null,
