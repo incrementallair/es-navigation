@@ -3,7 +3,7 @@
   "main": "./build/index",
   "version": "0.0.0",
   "description": "Scope-sensitive navigation tools for javascript. Includes ES6 support.",
-  "repository": "https://github.com/incrementallair/atom-symbol-navigation",
+  "repository": "https://github.com/incrementallair/es-navigation",
   "license": "MIT",
   "engines": {
     "atom": ">0.50.0"
