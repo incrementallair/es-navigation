@@ -6,11 +6,9 @@ Object.defineProperties(exports, {
   __esModule: {value: true}
 });
 var $__cache__,
-    $__util__,
     $__fs__;
 'use strict';
 var parseBuffer = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).parseBuffer;
-var util = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}).default;
 var fs = ($__fs__ = require("fs"), $__fs__ && $__fs__.__esModule && $__fs__ || {default: $__fs__}).default;
 ;
 function findSymbolDefinition(symbol, path) {
@@ -40,9 +38,9 @@ function findSymbolDefinition(symbol, path) {
   }
   if (isRoot) {
     if (!namespace) {
-      for (var $__3 = scope.definedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__4; !($__4 = $__3.next()).done; ) {
-        var sym = $__4.value;
+      for (var $__2 = scope.definedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+          $__3; !($__3 = $__2.next()).done; ) {
+        var sym = $__3.value;
         if (sym.localName == symbol)
           return {
             path: path,
@@ -50,43 +48,43 @@ function findSymbolDefinition(symbol, path) {
           };
       }
     }
-    for (var $__5 = scope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
-        $__6; !($__6 = $__5.next()).done; ) {
-      var sym$__11 = $__6.value;
+    for (var $__4 = scope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+        $__5; !($__5 = $__4.next()).done; ) {
+      var sym$__10 = $__5.value;
       {
         if (namespace) {
-          if (sym$__11.localName == namespace)
-            return findInModule(symbol, path, sym$__11.moduleRequest);
+          if (sym$__10.localName == namespace)
+            return findInModule(symbol, path, sym$__10.moduleRequest);
         } else {
-          if (sym$__11.localName == symbol)
-            return findInModule(sym$__11.importName, path, sym$__11.moduleRequest);
+          if (sym$__10.localName == symbol)
+            return findInModule(sym$__10.importName, path, sym$__10.moduleRequest);
         }
       }
     }
   } else {
-    for (var $__9 = scope.exportedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
-        $__10; !($__10 = $__9.next()).done; ) {
-      var sym$__12 = $__10.value;
+    for (var $__8 = scope.exportedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+        $__9; !($__9 = $__8.next()).done; ) {
+      var sym$__11 = $__9.value;
       {
-        if (sym$__12.importName == "*") {
-          var result = findInModule(symbol, path, sym$__12.moduleRequest);
+        if (sym$__11.importName == "*") {
+          var result = findInModule(symbol, path, sym$__11.moduleRequest);
           if (result)
             return result;
         }
-        if (sym$__12.exportName == symbol) {
-          if (sym$__12.type == "exportDeclaration")
+        if (sym$__11.exportName == symbol) {
+          if (sym$__11.type == "exportDeclaration")
             return {
               path: path,
-              loc: sym$__12.location
+              loc: sym$__11.location
             };
-          if (sym$__12.moduleRequest) {
-            return findInModule(sym$__12.localName, path, sym$__12.moduleRequest);
+          if (sym$__11.moduleRequest) {
+            return findInModule(sym$__11.localName, path, sym$__11.moduleRequest);
           } else {
-            for (var $__7 = scope.definedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
-                $__8; !($__8 = $__7.next()).done; ) {
-              var def = $__8.value;
+            for (var $__6 = scope.definedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+                $__7; !($__7 = $__6.next()).done; ) {
+              var def = $__7.value;
               {
-                if (def.localName == sym$__12.localName)
+                if (def.localName == sym$__11.localName)
                   return {
                     path: path,
                     loc: def.location

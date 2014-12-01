@@ -274,10 +274,14 @@ function jumpToPositionFrom(position, path, editor, params) {
   if (path == editor.getPath()) {
     applyJump(editor);
   } else {
+    var closeOnDeactivate = atom.workspace.getActivePane().itemForUri(path) ? false : true;
     atom.workspace.open(path, {
       activatePane: true,
       searchAllPanes: true
-    }).then(applyJump);
+    }).then((function(editor) {
+      applyJump(editor);
+      editor.closeOnDeactivate = closeOnDeactivate;
+    }));
   }
   function applyJump(editor) {
     editor.setCursorBufferPosition(position);
