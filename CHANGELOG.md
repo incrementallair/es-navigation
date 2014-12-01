@@ -1,3 +1,2 @@
-## 0.0.0 - First Commit
-* Basic scope sensitive navigation added.
-* A few problems with function parameters, also some UI tweaks that need to happen.
+## 0.1.0 - First Release
+* Support for prev/next binding navigation, select all binding in scope and  jumping to binding definition.

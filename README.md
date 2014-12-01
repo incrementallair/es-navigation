@@ -4,7 +4,7 @@ ES6 Navigation is an [Atom](https://atom.io) package providing simple scope-sens
 
 When writing modules with ES6 module syntax, it can be frustrating to navigate between module files and instances of an import binding. The idea is to introduce this control via simple key bindings, using scope and module analysis.
 
-![Usage Gif](es-navigate-demo.gif)
+![Usage Gif](https://raw.githubusercontent.com/incrementallair/es-navigation/master/es-navigate-demo.gif)
 
 ## Features
 By default the following keybindings are provided:
