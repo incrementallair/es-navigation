@@ -25,9 +25,8 @@ module.exports = {activate: function(state) {
     var lastItem = null;
     atom.workspace.observePanes((function(pane) {
       pane.onDidChangeActiveItem((function(item) {
-        if (lastItem && lastItem.closeOnDeactivate) {
+        if (lastItem && lastItem.closeOnDeactivate)
           lastItem.destroy();
-        }
         lastItem = item;
       }));
     }));
