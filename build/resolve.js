@@ -15,8 +15,9 @@ function resolveModulePath(basePath, moduleString) {
   var failsafeMax = 10;
   var basedir = path.dirname(basePath);
   var baseext = path.extname(basePath);
+  var _moduleString = moduleString;
   if (path.extname(moduleString) != baseext)
-    var _moduleString = moduleString + baseext;
+    _moduleString += baseext;
   var basemod,
       remmod;
   var splitModule = _moduleString.split(path.sep);
