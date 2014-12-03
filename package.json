@@ -1,7 +1,7 @@
 {
   "name": "es-navigation",
   "main": "./build/index",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Scope-sensitive navigation tools for javascript. Includes ES6 support.",
   "repository": "https://github.com/incrementallair/es-navigation",
   "license": "MIT",
