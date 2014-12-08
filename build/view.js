@@ -149,21 +149,27 @@ function toIdentifier(skip) {
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
-    var $__6 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor, {relativePosition: true}),
-        id = $__6.id,
-        references = $__6.references,
-        scope = $__6.scope,
-        relativePosition = $__6.relativePosition;
-    if (id && references) {
-      var next = getNextReference(id, references, skip);
-      var position = [next.loc.start.line - 1, next.loc.start.column + relativePosition];
-      jumpToLocationFrom(next.loc, editor.getPath(), editor, {position: position});
-      ourStatusBar.updateText((references.indexOf(id) + 1) + "/" + references.length + " matches");
-      if (scope.type != "global")
-        highlightScope(scope, editor);
-    } else {
-      updateStatusBar("ESNav: couldn't find symbol.");
-    }
+    getReferencesAtPosition(editor.getPath(), cursor, {relativePosition: true}, (function(error, result) {
+      if (error) {
+        console.warn("Error in toIdentifier while getting references: " + error);
+        return;
+      }
+      if (result) {
+        var $__6 = result,
+            id = $__6.id,
+            references = $__6.references,
+            scope = $__6.scope,
+            relativePosition = $__6.relativePosition;
+        var next = getNextReference(id, references, skip);
+        var position = [next.loc.start.line - 1, next.loc.start.column + relativePosition];
+        jumpToLocationFrom(next.loc, editor.getPath(), editor, {position: position});
+        ourStatusBar.updateText((references.indexOf(result.id) + 1) + "/" + references.length + " matches");
+        if (scope.type != "global")
+          highlightScope(scope, editor);
+      } else {
+        updateStatusBar("ESNav: couldn't find symbol.");
+      }
+    }));
   }
 }
 var ourStatusBar = null;

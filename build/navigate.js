@@ -12,13 +12,13 @@ Object.defineProperties(exports, {
   __esModule: {value: true}
 });
 var $__util__,
-    $__cache__,
-    $__search__;
+    $__search__,
+    $__es_45_parse_45_tools__;
 var $__0 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
     positionIsInsideLocation = $__0.positionIsInsideLocation,
     compareIdentifierLocations = $__0.compareIdentifierLocations;
-var parseBuffer = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).parseBuffer;
 var findSymbolDefinition = ($__search__ = require("./search"), $__search__ && $__search__.__esModule && $__search__ || {default: $__search__}).findSymbolDefinition;
+var tools = ($__es_45_parse_45_tools__ = require("es-parse-tools"), $__es_45_parse_45_tools__ && $__es_45_parse_45_tools__.__esModule && $__es_45_parse_45_tools__ || {default: $__es_45_parse_45_tools__}).default;
 function getDefinitionAtPosition(buffer, path, position) {
   var result = {
     import: null,
@@ -65,32 +65,26 @@ function getDefinitionAtPosition(buffer, path, position) {
   }
   return result;
 }
-function getReferencesAtPosition(buffer, path, position) {
-  var params = arguments[3] !== (void 0) ? arguments[3] : {};
-  var scopes = parseBuffer(buffer, path);
-  if (scopes) {
+function getReferencesAtPosition(path, position, params, callback) {
+  tools.parseURI(path, (function(error, scopes) {
+    if (error) {
+      console.warn("Error in getReferencesAtPosition while parsing URI: " + error);
+      return callback(error);
+    }
     for (var $__3 = scopes[$traceurRuntime.toProperty(Symbol.iterator)](),
         $__4; !($__4 = $__3.next()).done; ) {
       var scope = $__4.value;
       {
         var references = getReferencesAtPositionInScope(scope, position, params);
-        if (references.id && references.references) {
+        if (references) {
           references.scope = scope;
           references.globalScope = scopes[0];
-          return references;
+          return callback(null, references);
         }
       }
     }
-  }
-  var globalScope = scopes ? scopes[0] : null;
-  return {
-    id: null,
-    references: null,
-    scope: null,
-    relativePosition: null,
-    imports: null,
-    globalScope: globalScope
-  };
+    return callback(null, null);
+  }));
 }
 function getReferencesAtPositionInScope(scope, position) {
   var params = arguments[2] !== (void 0) ? arguments[2] : {};
@@ -122,8 +116,9 @@ function getReferencesAtPositionInScope(scope, position) {
       results.definitions = defines.filter(isIdLocalName);
     if (params.relativePosition)
       results.relativePosition = position.column - id.loc.start.column;
+    return results;
   }
-  return results;
+  return null;
 }
 function getNextReference(id, references) {
   var skip = arguments[2] !== (void 0) ? arguments[2] : 1;

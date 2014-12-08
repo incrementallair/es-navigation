@@ -5,9 +5,9 @@ Object.defineProperties(exports, {
     }},
   __esModule: {value: true}
 });
-var $__cache__,
+var $__es_45_parse_45_tools__,
     $__fs__;
-var parseBuffer = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).parseBuffer;
+var tools = ($__es_45_parse_45_tools__ = require("es-parse-tools"), $__es_45_parse_45_tools__ && $__es_45_parse_45_tools__.__esModule && $__es_45_parse_45_tools__ || {default: $__es_45_parse_45_tools__}).default;
 var fs = ($__fs__ = require("fs"), $__fs__ && $__fs__.__esModule && $__fs__ || {default: $__fs__}).default;
 function findSymbolDefinition(symbol, path) {
   var namespace = arguments[2] !== (void 0) ? arguments[2] : null;

@@ -9,6 +9,7 @@
     "atom": ">0.50.0"
   },
   "dependencies": {
+    "es-parse-tools": "^0.2.0",
     "escope": "git://github.com/Constellation/escope.git#master",
     "esprima-fb": "*",
     "estraverse": "1.7.1",
