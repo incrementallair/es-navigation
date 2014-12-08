@@ -51,31 +51,39 @@ function getDefinitionAtPosition(path, position, callback) {
       }
       if (id.property && id.object) {
         findSymbolDefinition(id.property, path, id.object, true, scope, (function(err, res) {
+          if (!res)
+            return checkGlobalScope();
           result.definition = res;
           return callback(null, result);
         }));
       } else {
         findSymbolDefinition(id.name, path, null, true, scope, (function(err, res) {
+          if (!res)
+            return checkGlobalScope();
           result.definition = res;
           return callback(null, result);
         }));
       }
-    } else if (globalScope) {
-      for (var $__5 = globalScope.exportedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__6; !($__6 = $__5.next()).done; ) {
-        var symbol$__8 = $__6.value;
-        {
-          if (symbol$__8.importLocation && positionIsInsideLocation(position, symbol$__8.importLocation)) {
-            if (symbol$__8.moduleRequest)
-              return findSymbolDefinition(symbol$__8.importName, symbol$__8.moduleRequest, null, false, scope, (function(err, res) {
-                result.definition = res;
-                return callback(null, result);
-              }));
+    } else
+      checkGlobalScope();
+    function checkGlobalScope() {
+      if (globalScope) {
+        for (var $__5 = globalScope.exportedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+            $__6; !($__6 = $__5.next()).done; ) {
+          var symbol = $__6.value;
+          {
+            if (symbol.importLocation && positionIsInsideLocation(position, symbol.importLocation)) {
+              if (symbol.moduleRequest)
+                return findSymbolDefinition(symbol.importName, symbol.moduleRequest, null, false, scope, (function(err, res) {
+                  result.definition = res;
+                  return callback(null, result);
+                }));
+            }
           }
         }
+        return callback(null, result);
       }
     }
-    return callback(null, result);
   }));
 }
 function getReferencesAtPosition(path, position, params, callback) {
