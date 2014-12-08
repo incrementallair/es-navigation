@@ -56,7 +56,7 @@ function toDefinition() {
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
     getDefinitionAtPosition(editor.getPath(), cursor, (function(err, def) {
-      if (err || !def)
+      if (err)
         return;
       if (definitionState === 0)
         definitionStack = {

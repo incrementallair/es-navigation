@@ -32,8 +32,6 @@ function getDefinitionAtPosition(path, position, callback) {
   }, (function(error, refs) {
     if (error)
       return callback(error);
-    if (!refs)
-      return callback(null, null);
     var $__7 = refs,
         id = $__7.id,
         scope = $__7.scope,
@@ -77,6 +75,7 @@ function getDefinitionAtPosition(path, position, callback) {
         }
       }
     }
+    return callback(null, result);
   }));
 }
 function getReferencesAtPosition(path, position, params, callback) {
@@ -97,7 +96,15 @@ function getReferencesAtPosition(path, position, params, callback) {
         }
       }
     }
-    return callback(null, null);
+    var globalScope = scopes ? scopes[0] : null;
+    return callback(null, {
+      id: null,
+      references: null,
+      scope: null,
+      relativePosition: null,
+      imports: null,
+      globalScope: globalScope
+    });
   }));
 }
 function getReferencesAtPositionInScope(scope, position) {
