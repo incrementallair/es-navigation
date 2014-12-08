@@ -15,6 +15,8 @@ function findSymbolDefinition(symbol, path, namespace, isRoot, _scope, callback)
   if (path == "notFound")
     return null;
   tools.parseURI(path, (function(error, scopes) {
+    if (error)
+      return console.warn(error);
     var scope = _scope || scopes[0];
     if (isRoot) {
       if (!namespace) {
