@@ -19,51 +19,66 @@ var $__0 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && 
     compareIdentifierLocations = $__0.compareIdentifierLocations;
 var findSymbolDefinition = ($__search__ = require("./search"), $__search__ && $__search__.__esModule && $__search__ || {default: $__search__}).findSymbolDefinition;
 var tools = ($__es_45_parse_45_tools__ = require("es-parse-tools"), $__es_45_parse_45_tools__ && $__es_45_parse_45_tools__.__esModule && $__es_45_parse_45_tools__ || {default: $__es_45_parse_45_tools__}).default;
-function getDefinitionAtPosition(buffer, path, position) {
+function getDefinitionAtPosition(path, position, callback) {
   var result = {
     import: null,
     definition: null,
     relativePosition: null,
     globalScope: null
   };
-  var $__7 = getReferencesAtPosition(buffer, path, position, {
+  getReferencesAtPosition(path, position, {
     includeImports: true,
     relativePosition: true
-  }),
-      id = $__7.id,
-      scope = $__7.scope,
-      globalScope = $__7.globalScope,
-      imports = $__7.imports,
-      relativePosition = $__7.relativePosition;
-  result.globalScope = globalScope;
-  if (id && scope) {
-    result.relativePosition = relativePosition;
-    for (var $__3 = imports[$traceurRuntime.toProperty(Symbol.iterator)](),
-        $__4; !($__4 = $__3.next()).done; ) {
-      var symbol = $__4.value;
-      {
-        if (symbol.localName == id.name)
-          result.import = symbol;
+  }, (function(error, refs) {
+    if (error)
+      return callback(error);
+    if (!refs)
+      return callback(null, null);
+    var $__7 = refs,
+        id = $__7.id,
+        scope = $__7.scope,
+        globalScope = $__7.globalScope,
+        imports = $__7.imports,
+        relativePosition = $__7.relativePosition;
+    result.globalScope = globalScope;
+    if (id && scope) {
+      result.relativePosition = relativePosition;
+      for (var $__3 = imports[$traceurRuntime.toProperty(Symbol.iterator)](),
+          $__4; !($__4 = $__3.next()).done; ) {
+        var symbol = $__4.value;
+        {
+          if (symbol.localName == id.name)
+            result.import = symbol;
+        }
       }
-    }
-    if (id.property && id.object) {
-      result.definition = findSymbolDefinition(id.property, path, id.object, true, scope);
-    } else {
-      result.definition = findSymbolDefinition(id.name, path, null, true, scope);
-    }
-  } else if (globalScope) {
-    for (var $__5 = globalScope.exportedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
-        $__6; !($__6 = $__5.next()).done; ) {
-      var symbol$__8 = $__6.value;
-      {
-        if (symbol$__8.importLocation && positionIsInsideLocation(position, symbol$__8.importLocation)) {
-          if (symbol$__8.moduleRequest)
-            result.definition = findSymbolDefinition(symbol$__8.importName, symbol$__8.moduleRequest, null, false, scope);
+      if (id.property && id.object) {
+        findSymbolDefinition(id.property, path, id.object, true, scope, (function(err, res) {
+          result.definition = res;
+          return callback(null, result);
+        }));
+      } else {
+        findSymbolDefinition(id.name, path, null, true, scope, (function(err, res) {
+          result.definition = res;
+          return callback(null, result);
+        }));
+      }
+    } else if (globalScope) {
+      for (var $__5 = globalScope.exportedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+          $__6; !($__6 = $__5.next()).done; ) {
+        var symbol$__8 = $__6.value;
+        {
+          if (symbol$__8.importLocation && positionIsInsideLocation(position, symbol$__8.importLocation)) {
+            if (symbol$__8.moduleRequest)
+              findSymbolDefinition(symbol$__8.importName, symbol$__8.moduleRequest, null, false, scope, (function(err, res) {
+                result.definition = res;
+                return callback(null, result);
+              }));
+          }
         }
       }
     }
-  }
-  return result;
+  }));
+  return callback(null, null);
 }
 function getReferencesAtPosition(path, position, params, callback) {
   tools.parseURI(path, (function(error, scopes) {

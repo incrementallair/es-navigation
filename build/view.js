@@ -36,75 +36,78 @@ Object.defineProperties(exports, {
   __esModule: {value: true}
 });
 var $__status_45_bar__,
-    $__cache__,
     $__util__,
-    $__navigate__;
+    $__navigate__,
+    $__es_45_parse_45_tools__;
 var StatusBarView = ($__status_45_bar__ = require("./status-bar"), $__status_45_bar__ && $__status_45_bar__.__esModule && $__status_45_bar__ || {default: $__status_45_bar__}).default;
-var parseBuffer = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).parseBuffer;
-var $__2 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
-    getActiveEditor = $__2.getActiveEditor,
-    createRangeFromLocation = $__2.createRangeFromLocation,
-    positionIsInsideLocation = $__2.positionIsInsideLocation;
-var $__3 = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}),
-    getReferencesAtPosition = $__3.getReferencesAtPosition,
-    getNextReference = $__3.getNextReference,
-    getDefinitionAtPosition = $__3.getDefinitionAtPosition;
+var $__1 = ($__util__ = require("./util"), $__util__ && $__util__.__esModule && $__util__ || {default: $__util__}),
+    getActiveEditor = $__1.getActiveEditor,
+    createRangeFromLocation = $__1.createRangeFromLocation,
+    positionIsInsideLocation = $__1.positionIsInsideLocation;
+var $__2 = ($__navigate__ = require("./navigate"), $__navigate__ && $__navigate__.__esModule && $__navigate__ || {default: $__navigate__}),
+    getReferencesAtPosition = $__2.getReferencesAtPosition,
+    getNextReference = $__2.getNextReference,
+    getDefinitionAtPosition = $__2.getDefinitionAtPosition;
+var tools = ($__es_45_parse_45_tools__ = require("es-parse-tools"), $__es_45_parse_45_tools__ && $__es_45_parse_45_tools__.__esModule && $__es_45_parse_45_tools__ || {default: $__es_45_parse_45_tools__}).default;
 var definitionStack = null,
     definitionState = 0;
 function toDefinition() {
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
-    var def = getDefinitionAtPosition(editor.getText(), editor.getPath(), cursor);
-    if (definitionState === 0)
-      definitionStack = {
-        path: editor.getPath(),
-        pos: cursor,
-        range: null
-      };
-    if (def.globalScope) {
-      for (var $__4 = def.globalScope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__5; !($__5 = $__4.next()).done; ) {
-        var symbol = $__5.value;
-        {
-          if (positionIsInsideLocation(cursor, symbol.importLocation)) {
-            if (symbol.location)
-              definitionStack.range = createRangeFromLocation(symbol.location);
-            if (def.definition) {
-              var position = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
-              return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
-                state: 2,
-                position: position
-              });
+    getDefinitionAtPosition(editor.getPath(), cursor, (function(err, def) {
+      if (err || !def)
+        return;
+      if (definitionState === 0)
+        definitionStack = {
+          path: editor.getPath(),
+          pos: cursor,
+          range: null
+        };
+      if (def.globalScope) {
+        for (var $__4 = def.globalScope.importedSymbols[$traceurRuntime.toProperty(Symbol.iterator)](),
+            $__5; !($__5 = $__4.next()).done; ) {
+          var symbol = $__5.value;
+          {
+            if (positionIsInsideLocation(cursor, symbol.importLocation)) {
+              if (symbol.location)
+                definitionStack.range = createRangeFromLocation(symbol.location);
+              if (def.definition) {
+                var position = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
+                return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
+                  state: 2,
+                  position: position
+                });
+              }
+              clearModuleHighlights();
+              highlightImport(editor, {position: editor.getCursorBufferPosition()});
+              if (["unresolved", "notFound", "parseError"].indexOf(symbol.moduleRequest) == -1)
+                return jumpToPositionFrom([0, 0], symbol.moduleRequest, editor, {state: 1});
             }
-            clearModuleHighlights();
-            highlightImport(editor, {position: editor.getCursorBufferPosition()});
-            if (["unresolved", "notFound", "parseError"].indexOf(symbol.moduleRequest) == -1)
-              return jumpToPositionFrom([0, 0], symbol.moduleRequest, editor, {state: 1});
           }
         }
       }
-    }
-    if (def.import && definitionState === 0) {
-      definitionStack.range = createRangeFromLocation(def.import.location);
-      var position$__7 = [def.import.location.start.line - 1, def.import.location.start.column + def.relativePosition];
-      return jumpToLocationFrom(def.import.location, editor.getPath(), editor, {
-        state: 1,
-        position: position$__7
-      });
-    }
-    if (def.definition && definitionState < 2) {
-      var position$__8 = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
-      return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
-        state: 2,
-        position: position$__8
-      });
-    }
-    if (definitionState > 0) {
-      jumpToPositionFrom(definitionStack.pos, definitionStack.path, editor, {state: 0}, definitionStack.range);
-      clearDefinitionStack();
-      return;
-    }
+      if (def.import && definitionState === 0) {
+        definitionStack.range = createRangeFromLocation(def.import.location);
+        var position$__7 = [def.import.location.start.line - 1, def.import.location.start.column + def.relativePosition];
+        return jumpToLocationFrom(def.import.location, editor.getPath(), editor, {
+          state: 1,
+          position: position$__7
+        });
+      }
+      if (def.definition && definitionState < 2) {
+        var position$__8 = [def.definition.loc.start.line - 1, def.definition.loc.start.column + def.relativePosition];
+        return jumpToLocationFrom(def.definition.loc, def.definition.path, editor, {
+          state: 2,
+          position: position$__8
+        });
+      }
+      if (definitionState > 0) {
+        jumpToPositionFrom(definitionStack.pos, definitionStack.path, editor, {state: 0}, definitionStack.range);
+        clearDefinitionStack();
+        return;
+      }
+    }));
   }
   updateStatusBar('ESNav: could not find binding');
   clearModuleHighlights();
@@ -185,25 +188,26 @@ function createStatusBarView() {
   }
 }
 function highlightImport(editor, params) {
-  var scopes = parseBuffer(editor.getText(), editor.getPath());
-  if (!scopes)
-    return;
-  var scope = scopes[0];
-  for (var $__4 = scope.importedSymbols.concat(scope.exportedSymbols)[$traceurRuntime.toProperty(Symbol.iterator)](),
-      $__5; !($__5 = $__4.next()).done; ) {
-    var symbol = $__5.value;
-    {
-      var match = false;
-      if (params.symbol && symbol.localName == params.symbol.name)
-        match = true;
-      if (symbol.importLocation && params.position && positionIsInsideLocation(params.position, symbol.importLocation))
-        match = true;
-      if (match) {
-        highlightModuleSymbol(editor, symbol);
-        return;
+  tools.parseURI(editor.getPath(), (function(error, scopes) {
+    if (error)
+      return;
+    var scope = scopes[0];
+    for (var $__4 = scope.importedSymbols.concat(scope.exportedSymbols)[$traceurRuntime.toProperty(Symbol.iterator)](),
+        $__5; !($__5 = $__4.next()).done; ) {
+      var symbol = $__5.value;
+      {
+        var match = false;
+        if (params.symbol && symbol.localName == params.symbol.name)
+          match = true;
+        if (symbol.importLocation && params.position && positionIsInsideLocation(params.position, symbol.importLocation))
+          match = true;
+        if (match) {
+          highlightModuleSymbol(editor, symbol);
+          return;
+        }
       }
     }
-  }
+  }));
 }
 var moduleHighlights = new Map();
 function highlightModuleSymbol(editor, symbol) {

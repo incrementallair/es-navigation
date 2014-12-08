@@ -1,6 +1,5 @@
 "use strict";
-var $__view__,
-    $__cache__;
+var $__view__;
 var $__0 = ($__view__ = require("./view"), $__view__ && $__view__.__esModule && $__view__ || {default: $__view__}),
     toNextIdentifier = $__0.toNextIdentifier,
     toPrevIdentifier = $__0.toPrevIdentifier,
@@ -11,10 +10,8 @@ var $__0 = ($__view__ = require("./view"), $__view__ && $__view__.__esModule && 
     clearHighlight = $__0.clearHighlight,
     clearModuleHighlights = $__0.clearModuleHighlights,
     clearDefinitionStack = $__0.clearDefinitionStack;
-var clearCache = ($__cache__ = require("./cache"), $__cache__ && $__cache__.__esModule && $__cache__ || {default: $__cache__}).clearCache;
 module.exports = {activate: function(state) {
     atom.packages.once('activated', createStatusBarView);
-    atom.workspaceView.subscribe(atom.config.observe('es-navigation.es6Support', clearCache));
     atom.workspaceView.command("es-navigation:next-symbol", toNextIdentifier);
     atom.workspaceView.command("es-navigation:previous-symbol", toPrevIdentifier);
     atom.workspaceView.command("es-navigation:select-all-id", selectAllIdentifiers);

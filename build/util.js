@@ -18,6 +18,9 @@ Object.defineProperties(exports, {
   getActiveEditor: {get: function() {
       return getActiveEditor;
     }},
+  asyncForEach: {get: function() {
+      return asyncForEach;
+    }},
   __esModule: {value: true}
 });
 var $__view__;
@@ -66,4 +69,14 @@ function createRangeFromLocation(loc) {
 }
 function getActiveEditor() {
   return atom.workspace.getActiveTextEditor();
+}
+function asyncForEach(arr, cb, func) {
+  var ind = arguments[3] !== (void 0) ? arguments[3] : 0;
+  if (arr.length <= ind)
+    return cb(null, null);
+  func(arr[ind], (function(err, res) {
+    if (res)
+      return cb(null, res);
+    asyncForEach(arr, cb, func, ind + 1);
+  }));
 }
