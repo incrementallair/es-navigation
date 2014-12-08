@@ -123,6 +123,8 @@ function selectAllIdentifiers() {
     getReferencesAtPosition(editor.getPath(), cursor, {}, (function(error, result) {
       if (error)
         return console.warn("Error in selectAllIdentifiers while getting references: " + error);
+      if (!result)
+        return;
       var $__6 = result,
           id = $__6.id,
           references = $__6.references,

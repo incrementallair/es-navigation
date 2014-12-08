@@ -14,7 +14,7 @@ var asyncForEach = ($__util__ = require("./util"), $__util__ && $__util__.__esMo
 function findSymbolDefinition(symbol, path, namespace, isRoot, _scope, callback) {
   if (path == "notFound")
     return null;
-  tools.parseUri(path, (function(error, scopes) {
+  tools.parseURI(path, (function(error, scopes) {
     var scope = _scope || scopes[0];
     if (isRoot) {
       if (!namespace) {

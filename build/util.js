@@ -23,8 +23,6 @@ Object.defineProperties(exports, {
     }},
   __esModule: {value: true}
 });
-var $__view__;
-var highlightImport = ($__view__ = require("./view"), $__view__ && $__view__.__esModule && $__view__ || {default: $__view__}).highlightImport;
 function getMemberExpressionString(node) {
   if (node.type === "Identifier")
     return node.name;
