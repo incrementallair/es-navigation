@@ -69,7 +69,7 @@ function getDefinitionAtPosition(path, position, callback) {
         {
           if (symbol$__8.importLocation && positionIsInsideLocation(position, symbol$__8.importLocation)) {
             if (symbol$__8.moduleRequest)
-              findSymbolDefinition(symbol$__8.importName, symbol$__8.moduleRequest, null, false, scope, (function(err, res) {
+              return findSymbolDefinition(symbol$__8.importName, symbol$__8.moduleRequest, null, false, scope, (function(err, res) {
                 result.definition = res;
                 return callback(null, result);
               }));
@@ -78,7 +78,6 @@ function getDefinitionAtPosition(path, position, callback) {
       }
     }
   }));
-  return callback(null, null);
 }
 function getReferencesAtPosition(path, position, params, callback) {
   tools.parseURI(path, (function(error, scopes) {

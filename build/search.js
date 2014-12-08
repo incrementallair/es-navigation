@@ -84,7 +84,6 @@ function findSymbolDefinition(symbol, path, namespace, isRoot, _scope, callback)
       }));
     }
   }));
-  callback(null, null);
 }
 function findInModule(symbol, basePath, moduleRequest, callback) {
   findSymbolDefinition(symbol, moduleRequest, null, false, null, callback);
