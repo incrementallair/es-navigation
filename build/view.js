@@ -117,26 +117,31 @@ function selectAllIdentifiers() {
   var editor = getActiveEditor();
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
-    var $__6 = getReferencesAtPosition(editor.getText(), editor.getPath(), cursor),
-        id = $__6.id,
-        references = $__6.references,
-        scope = $__6.scope;
-    if (references && id) {
-      for (var $__4 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
-          $__5; !($__5 = $__4.next()).done; ) {
-        var reference = $__5.value;
-        {
-          var range = createRangeFromLocation(reference.loc);
-          editor.addSelectionForBufferRange(range);
+    getReferencesAtPosition(editor.getPath(), cursor, {}, (function(error, result) {
+      if (error)
+        return console.warn("Error in selectAllIdentifiers while getting references: " + error);
+      var $__6 = result,
+          id = $__6.id,
+          references = $__6.references,
+          scope = $__6.scope;
+      if (references && id) {
+        for (var $__4 = references[$traceurRuntime.toProperty(Symbol.iterator)](),
+            $__5; !($__5 = $__4.next()).done; ) {
+          var reference = $__5.value;
+          {
+            var range = createRangeFromLocation(reference.loc);
+            editor.addSelectionForBufferRange(range);
+          }
         }
+        updateStatusBar(references.length + " matches");
+        clearHighlight();
+        highlightImport(editor, {symbol: id});
+        if (scope.type != "global")
+          highlightScope(scope, editor);
+      } else {
+        updateStatusBar("ESNav: couldn't find symbol.");
       }
-      updateStatusBar(references.length + " matches");
-      clearHighlight();
-      highlightImport(editor, {symbol: id});
-      if (scope.type != "global")
-        highlightScope(scope, editor);
-    } else
-      updateStatusBar("ESNav: couldn't find symbol.");
+    }));
   }
 }
 function toNextIdentifier() {
@@ -150,10 +155,8 @@ function toIdentifier(skip) {
   if (editor) {
     var cursor = editor.getCursorBufferPosition();
     getReferencesAtPosition(editor.getPath(), cursor, {relativePosition: true}, (function(error, result) {
-      if (error) {
-        console.warn("Error in toIdentifier while getting references: " + error);
-        return;
-      }
+      if (error)
+        return console.warn("Error in toIdentifier while getting references: " + error);
       if (result) {
         var $__6 = result,
             id = $__6.id,
